@@ -1,0 +1,15 @@
+/* Pretendard — 로컬 가변 폰트.
+ *
+ * 원본은 cdn.jsdelivr.net 에서 두 벌(가변·정적)을 받아 썼다. 외부 의존성을 없애려고
+ * 저장소에 이미 있던 가변 폰트 파일 하나로 대체한다. 본문 CSS 가 쓰는 이름이
+ * 'Pretendard' 이므로 여기서도 같은 이름으로 등록한다. 굵기 45~920 을 한 파일이 덮는다.
+ *
+ * 라이선스: SIL Open Font License 1.1 — assets/fonts/PretendardVariable-OFL.txt
+ */
+@font-face {
+  font-family: "Pretendard";
+  font-style: normal;
+  font-weight: 45 920;
+  font-display: swap;
+  src: url("../fonts/PretendardVariable.woff2") format("woff2-variations");
+}

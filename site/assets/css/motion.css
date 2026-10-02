@@ -1,0 +1,63 @@
+/* 등장 모션과 이미지 호버 — 원본의 화면 동작만 옮겨 왔다.
+ *
+ * 원본은 웹빌더 서버의 모션 CSS 를 @import 하고 16KB짜리 런타임을 함께 받았다.
+ * 그 런타임은 에디터 캔버스 연동·마우스 tilt·행 캐스케이드까지 들어 있어서, 배포용
+ * 정적 페이지에는 필요 없다. 화면에 실제로 보이던 두 가지만 남긴다.
+ *   1) 스크롤해서 들어오면 아래에서 위로 떠오르며 나타나기
+ *   2) 이미지에 마우스를 올리면 살짝 확대
+ *
+ * 안전장치: 감추는 규칙은 전부 html[data-fp-motion="on"] 아래에만 둔다. 이 속성은
+ * assets/js/site.js 가 관찰을 시작하기 직전에 붙인다. 자바스크립트가 막히거나
+ * 실패하면 속성이 붙지 않아 내용이 처음부터 그대로 보인다. 원본의 no-js 폴백과 같은 방식이다.
+ */
+
+/* 1) 등장 — 관찰 대상은 원본이 쓰던 .zs-aos 그대로다. */
+html[data-fp-motion="on"] .zs-aos {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 1.4s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 이미지·영상은 떠오르지 않는다. 카드 안에서 잘려 보이는 것을 막기 위해서다(원본과 동일). */
+html[data-fp-motion="on"] .zs-aos[data-zs-role="image"],
+html[data-fp-motion="on"] .zs-aos[data-zs-role="video"],
+html[data-fp-motion="on"] .zs-aos[data-zs-aos-flat] {
+  transform: none;
+}
+
+html[data-fp-motion="on"] .zs-aos.zs-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* 2) 이미지 호버 확대 — 마우스가 있는 기기에서만. 원본과 같은 1.08 / 0.7s. */
+@media (hover: hover) and (pointer: fine) {
+  [data-zs-role="image"] img,
+  [data-zs-role="video"] video {
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  [data-zs-role="image"]:hover img,
+  [data-zs-role="video"]:hover video {
+    transform: scale(1.08);
+  }
+}
+
+/* 접근성 — OS 에서 모션 줄이기를 켠 사용자에게는 움직이지 않는다. */
+@media (prefers-reduced-motion: reduce) {
+  html[data-fp-motion="on"] .zs-aos {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  [data-zs-role="image"] img,
+  [data-zs-role="video"] video {
+    transition-duration: 0ms;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-play-state: paused !important;
+  }
+}

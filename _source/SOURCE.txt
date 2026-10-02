@@ -1,0 +1,12 @@
+원본 파일 보존 기록
+====================
+원본 경로 : C:/Users/User/Downloads/index (1).html
+크기      : 405,924 bytes
+수정 시각 : 2026-08-27 21:15:28
+sha256    : 3B7D496CFBE12295B5691A2D25B4F49512F13954D9D8924EAB2E38A06C99D234
+
+보존 복사본 : _source/index-original.html
+복사본 sha256 : 3B7D496CFBE12295B5691A2D25B4F49512F13954D9D8924EAB2E38A06C99D234
+바이트 동일 : True
+
+이 복사본과 원본은 읽기 전용으로만 다룬다. 작업은 site/ 아래에서만 한다.

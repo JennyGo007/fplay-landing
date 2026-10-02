@@ -1,0 +1,16 @@
+# 빌드 도구(tools/*.py)가 만드는 캐시
+__pycache__/
+*.py[cod]
+
+# 편집기·OS 찌꺼기
+.DS_Store
+Thumbs.db
+*~
+*.swp
+
+# 설정과 비밀값은 저장소에 넣지 않는다.
+# 현재 이 묶음에는 비밀값이 없고, site/assets/js/config.js 는 공개 설정
+# (platformUrl·contactEmail)이라 일부러 추적한다.
+.env
+.env.*
+!.env.example

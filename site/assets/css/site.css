@@ -1,0 +1,115 @@
+/* 정적 배포에서 새로 필요해진 것만 담는다. 원본 디자인 규칙은 하나도 건드리지 않는다. */
+
+/* 메뉴가 같은 페이지 안의 섹션으로 이동하게 되면서 생긴 문제 하나.
+ * 헤더가 sticky(높이 62px)라, 앵커로 뛰면 섹션 제목이 헤더 밑에 깔린다.
+ * 헤더 높이만큼 여백을 두어 제목이 헤더 아래에서 시작하게 한다. */
+:target,
+#about,
+#how,
+#safety,
+#adopt,
+#contact {
+  scroll-margin-top: 62px;
+}
+
+/* 문의 폼 결과 알림.
+ * 원본 폼은 action="#" 이라 눌러도 아무 일이 없었다. 지금은 메일 앱을 여는데,
+ * 메일 앱이 없는 환경도 있어 무슨 일이 일어났는지 글로도 알려 준다.
+ * 비어 있을 때는 자리를 차지하지 않는다. */
+.fp-form-status {
+  margin: 12px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.fp-form-status:empty {
+  display: none;
+}
+.fp-form-status[data-state="ok"] {
+  color: #1B7F4B;
+}
+.fp-form-status[data-state="warn"] {
+  color: #B54708;
+}
+.fp-form-status a {
+  color: inherit;
+  font-weight: 700;
+}
+
+/* 브랜드 심벌 — 공식 연꽃 자산.
+ * 원본은 투명 배경 정사각 PNG 다. 자르거나 늘이지 않고 상자 안에 비율대로 넣는다.
+ * 상자 크기(헤더 30px · 푸터 28px)는 원래 CSS 그대로라 헤더 높이가 바뀌지 않는다. */
+.nd-logo__mark {
+  object-fit: contain;
+}
+.nd-flogo span img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* 자주 묻는 질문 — 카드 하나에 질문 버튼과 답이 세로로 쌓인다.
+ *
+ * 원래 카드(.zs-rn2texfagd-7 …)는 질문과 화살표를 한 줄로 놓는 flex 였다.
+ * 답이 아래에 붙어야 하므로 카드는 block 으로 돌리고, 그 안의 버튼이 원래의
+ * 한 줄 배치를 그대로 이어받는다. 카드의 배경·모서리·여백은 건드리지 않는다.
+ * 원본 규칙이 뒤에 오므로 여기서만 !important 를 쓴다. */
+.fp-faq__item {
+  display: block !important;
+}
+
+.fp-faq__q {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--zs-space-20, 20px);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.fp-faq__q:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+/* 화살표는 열리면 아래를 가리킨다. 모션을 줄이도록 설정한 사용자에게는 돌지 않는다. */
+.fp-faq__q svg {
+  transition: transform 0.25s ease;
+}
+.fp-faq__q[aria-expanded="true"] svg {
+  transform: rotate(90deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .fp-faq__q svg {
+    transition: none;
+  }
+}
+
+.fp-faq__a {
+  margin-top: 16px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 15px;
+  line-height: 1.75;
+  word-break: keep-all;
+}
+.fp-faq__a p {
+  margin: 0;
+}
+
+.fp-faq__more {
+  display: inline-block;
+  margin-top: 12px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

@@ -1,0 +1,136 @@
+/* zaemit motion contract v2 — 렌더/익스포트 계층 주입용. 블록 원본 무수정.
+   v2.1: 등장 소유 + A4 클립 잘림 flat(런타임 마킹) — GPT 조건부GO 2026-07-07 */
+
+/* [R1] no-js / 러너 실패 폴백: ready 선언 전엔 콘텐츠 무조건 보임 */
+html:not([data-zs-runtime="ready"]) .zs-aos {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+/* [A′] 등장 전이 — 러너 소유 (블록 내장 0.7s를 specificity로 오버라이드, 무 !important: no-js/off 룰과의 위계 보존) */
+html[data-zs-runtime="ready"] .zs-aos {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 1.4s cubic-bezier(.22, 1, .36, 1), transform 1.4s cubic-bezier(.22, 1, .36, 1);
+}
+/* [A3] 미디어: 상승 없음(클립 카드 하단 잘림 원천 제거) — 초기부터 transform 없음 (GPT R4) */
+html[data-zs-runtime="ready"] .zs-aos[data-zs-role="image"]:not(.zs-motion-row),
+html[data-zs-runtime="ready"] .zs-aos[data-zs-role="video"]:not(.zs-motion-row),
+html[data-zs-runtime="ready"] .zs-aos[data-zs-aos-flat]:not(.zs-motion-row) {
+  transform: none; /* v3.7: 행 승격 프레임엔 미적용(0,3,1이 V3-R lift를 이기던 지뢰) — v2 페이지는 zs-motion-row 부재로 무영향 */
+}
+html[data-zs-runtime="ready"] .zs-aos.zs-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* [A6] 이미지 hover 확대 — 파일 소유 통일: 1.03 / 0.7s / 확정커브 (GPT 조건부GO 2026-07-07)
+   노드 분리: 등장=프레임, 확대=내부 img. motion off/스틸컷에서도 유지(v19 확정) */
+@media (hover: hover) and (pointer: fine) {
+  [data-zs-role="image"] img,
+  [data-zs-role="video"] video {
+    transition: transform 0.7s cubic-bezier(.22, 1, .36, 1);
+  }
+  [data-zs-role="image"]:hover img,
+  [data-zs-role="video"]:hover video {
+    transform: scale(1.08); /* v3.9: 1.03→1.08 (효남 판정 — 호버 존재감) */
+  }
+}
+
+/* [SW] 모션 off — 등장모션: 전이 없이 즉시 노출 (페이지/블록/요소 3단 공통) */
+html[data-zs-motion="off"] .zs-aos,
+[data-zs-motion="off"] .zs-aos,
+.zs-aos[data-zs-motion="off"] {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+/* [SW] 모션 off — 루프/CSS 애니 정지. 호버 트랜지션은 유지(v19 확정 스펙 일관) */
+html[data-zs-motion="off"] *,
+html[data-zs-motion="off"] *::before,
+html[data-zs-motion="off"] *::after,
+[data-zs-motion="off"],
+[data-zs-motion="off"] *,
+[data-zs-motion="off"] *::before,
+[data-zs-motion="off"] *::after {
+  animation-play-state: paused !important;
+}
+
+/* [SW] 마우스 레이어 off 초기화 */
+html[data-zs-motion="off"] [data-zs-mouse-layer],
+[data-zs-motion="off"] [data-zs-mouse-layer] {
+  transform: none !important;
+}
+
+/* 접근성: OS 모션 축소 존중 (GPT 비협상) */
+@media (prefers-reduced-motion: reduce) {
+  .zs-aos { opacity: 1 !important; transform: none !important; transition: none !important; }
+  *, *::before, *::after { animation-play-state: paused !important; }
+  [data-zs-mouse-layer] { transform: none !important; }
+  [data-zs-role="image"] img, [data-zs-role="video"] video { transition-duration: 0ms; }
+}
+
+/* ═══ v3 — 블록 유닛 등장 + 이미지 줌 (GPT 조건부GO 2026-07-11) ═══
+   게이트: html[data-zs-motion-v="3"] (러너 v3가 선언). v2 룰은 폴백으로 보존. */
+
+/* [V3-N] 기존 .zs-aos 개별 등장 중립화 — 러너 zs-in 일괄 부여와 병행(GPT Q2)
+   v3.7: 행 승격 요소는 제외 — !important 중립화가 행 채널(op0/ty48/전환)을 선점해 "박힘" 유발하던 버그 */
+html[data-zs-motion-v="3"] .zs-aos:not(.zs-motion-row) {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+/* [V3-R] 행 캐스케이드 — 배경(섹션·블록루트) 고정, 콘텐츠 행만 등장. lift 22px / op 1s·tf 1.2s */
+html[data-zs-motion-v="3"] .zs-motion-row {
+  opacity: 0;
+  transform: translateY(48px) translateZ(0); /* 초기화는 즉시(전환 무) — enter에만 전환. v3.8: GPU 레이어 락(글자 재래스터 찌글 차단) */
+  backface-visibility: hidden;
+  transition: none; /* v3.7: 행 제외로 노출되는 [A′] 1.4s·블록 내장 전이 차단 */
+}
+html[data-zs-motion-v="3"] .zs-motion-row[data-zs-row-flat] {
+  transform: none; /* fixed 보유 행 = opacity-only (GPT Q4-A안) — 클립은 마스크 리빌로 허용 */
+}
+html[data-zs-motion-v="3"] .zs-motion-row.zs-in {
+  opacity: 1;
+  transform: none;
+  /* v3.8: 착지 크롤 컷 — 이동 1.2s 하우스커브(꼬리 짧음), op 1.3s가 100ms 더 살아 착지를 가림 */
+  transition: opacity 1.3s cubic-bezier(.16, 1, .3, 1), transform 1.2s cubic-bezier(.22, 1, .36, 1);
+}
+
+/* [V3-Z] 이미지 줌 등장 — 직계 한정(루프 레이어 자연 제외), hover와 transition 공유 */
+
+html[data-zs-motion-v="3"] .zs-motion-unit.zs-in.zs-settled [data-zs-zoom] {
+  transition: transform .7s cubic-bezier(.22, 1, .36, 1); /* 등장 종료 후 hover 채널 복원. v3.9: .zs-in 추가로 (0,5,1) — 동특이도 후순위 .zs-in 룰(2.4s)에 상시 패배하던 버그 해소(hover 최후단 (0,5,1) 동점·후순위라 계약 유지) */
+}
+html[data-zs-motion-v="3"] .zs-motion-unit:not(.zs-in) [data-zs-zoom] {
+  transform: scale(1.18); /* 러너 마킹 — 프레임별 유효 미디어(구조 무관·xfade 제외) */
+}
+html[data-zs-motion-v="3"] .zs-motion-unit.zs-in [data-zs-zoom] {
+  transform: none;
+  transition: transform 2.4s cubic-bezier(.25, .4, .25, 1);
+}
+/* hover 최후단 — unit-in 룰을 확실히 이김 (GPT Q3 필수) */
+@media (hover: hover) and (pointer: fine) {
+  html[data-zs-motion-v="3"] .zs-motion-unit.zs-in [data-zs-role="image"]:hover [data-zs-zoom],
+  html[data-zs-motion-v="3"] .zs-motion-unit.zs-in [data-zs-zoom][data-zs-role="image"]:hover,
+  html[data-zs-motion-v="3"] .zs-motion-unit.zs-in [data-zs-role="video"]:hover [data-zs-zoom] {
+    transform: scale(1.08); /* v3.9: [A6]와 동일값 통일 */
+  }
+}
+
+/* [V3-SW] 모션 off / reduced — 유닛·줌 즉시 정상화 (줌 초기값 제거 포함, GPT Q3) */
+html[data-zs-motion="off"] .zs-motion-unit, html[data-zs-motion="off"] .zs-motion-row,
+[data-zs-motion="off"] .zs-motion-unit, [data-zs-motion="off"] .zs-motion-row,
+.zs-motion-unit[data-zs-motion="off"], .zs-motion-row[data-zs-motion="off"] {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+html[data-zs-motion="off"] [data-zs-zoom] { transform: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .zs-motion-unit, .zs-motion-row { opacity: 1 !important; transform: none !important; transition: none !important; }
+  [data-zs-zoom] { transform: none !important; }
+}
