@@ -113,3 +113,11 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* 운영 브랜드 표기: 별도 링크 없이 로고 옆에 표시한다. */
+.nd-brand { display: flex; align-items: center; flex-wrap: wrap; column-gap: 8px; row-gap: 2px; flex: 0 0 auto; }
+.nd-brand__by { color: #687078; font-size: 11px; font-weight: 400; line-height: 1.2; white-space: nowrap; }
+@media (max-width: 640px) {
+  .nd-brand { flex-direction: column; align-items: flex-start; }
+  .nd-brand__by { margin-left: 40px; }
+}
