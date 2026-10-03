@@ -185,7 +185,7 @@ LINKS = [
     ("/login", "로그인", PLATFORM, 3),
     ("/sign-up", "무료로 시작", PLATFORM, 1),
     ("/sign-up", "회원가입", PLATFORM, 1),
-    ("/sign-up", "튜토리얼 시작", GUIDE, 1),
+    ("/sign-up", "튜토리얼", GUIDE, 1),
     ("/page/about", "서비스 소개", 'href="#about"', 2),
     ("/page/how", "이용 방법", 'href="#how"', 2),
     ("/page/safety", "안전·프라이버시", 'href="#safety"', 2),
@@ -257,21 +257,21 @@ swap("border-radius:9px;background:#3B5BDB;display:flex;align-items:center;"
      "display:flex;align-items:center;justify-content:center;font-size:14px",
      "푸터 심벌 뒤 파란 사각형 제거", 2)
 
-# ─────────────────────────────────────── 9) CTA — 튜토리얼 시작으로 통일
+# ─────────────────────────────────────── 9) CTA — 튜토리얼으로 통일
 #
 # '무료로 시작'·'회원가입' 은 가입 절차가 따로 없는 지금 구조와 맞지 않는다.
-# 행동 유도 버튼은 모두 '튜토리얼 시작'(guideUrl) 으로 모으고,
+# 행동 유도 버튼은 모두 '튜토리얼'(guideUrl) 으로 모으고,
 # 플랫폼(platformUrl) 으로 가는 것은 '로그인' 뿐이다.
 swap('<a class="nd-btn nd-btn--dark" href="platform.html" data-fplay-link="platform" '
      'data-node-id="n_mtbgdrc0_y">무료로 시작</a>',
      '<a class="nd-btn nd-btn--dark" href="guide.html" data-fplay-link="guide" '
-     'data-node-id="n_mtbgdrc0_y">튜토리얼 시작</a>',
-     "헤더 CTA: 무료로 시작 → 튜토리얼 시작")
+     'data-node-id="n_mtbgdrc0_y">튜토리얼</a>',
+     "헤더 CTA: 무료로 시작 → 튜토리얼")
 swap('<a href="platform.html" data-fplay-link="platform" '
      'data-node-id="n_mtbgdrc2_93">회원가입</a>',
      '<a href="guide.html" data-fplay-link="guide" '
-     'data-node-id="n_mtbgdrc2_93">튜토리얼 시작</a>',
-     "푸터: 회원가입 → 튜토리얼 시작")
+     'data-node-id="n_mtbgdrc2_93">튜토리얼</a>',
+     "푸터: 회원가입 → 튜토리얼")
 
 # ────────────────────────────────────────────────── 10) FAQ — 펼치는 목록으로
 #

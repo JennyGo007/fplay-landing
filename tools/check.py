@@ -249,8 +249,8 @@ check("안내·약관 페이지도 같은 공식 파비콘을 쓴다",
 print("\n[7] CTA·메타데이터")
 check("'무료로 시작' 0건", "무료로 시작" not in idx)
 check("'회원가입' 0건", "회원가입" not in idx)
-tut = re.findall(r"<a[^>]*>튜토리얼 시작</a>", idx)
-check("'튜토리얼 시작' CTA %d건이 모두 guide 로 간다" % len(tut),
+tut = re.findall(r"<a[^>]*>튜토리얼</a>", idx)
+check("'튜토리얼' CTA %d건이 모두 guide 로 간다" % len(tut),
       len(tut) >= 2 and all('data-fplay-link="guide"' in t for t in tut))
 lin = re.findall(r"<a[^>]*>로그인</a>", idx)
 check("'로그인' %d건이 모두 platform 으로 간다" % len(lin),
@@ -285,11 +285,11 @@ BRAND_EDITS = [
     ("論", None),                  # 헤더 심벌 → 이미지
     ("논담", "NONDAM : F-Play"),    # 헤더 서비스명
     ("NONDAM", None),              # 헤더 부제
-    ("무료로 시작", "튜토리얼 시작"),  # 헤더 CTA
+    ("무료로 시작", "튜토리얼"),  # 헤더 CTA
     ("論", None),                  # 푸터 심벌 → 이미지
     ("논담 ", "NONDAM : F-Play"),   # 푸터 서비스명
     ("NONDAM", None),              # 푸터 부제
-    ("회원가입", "튜토리얼 시작"),    # 푸터 CTA
+    ("회원가입", "튜토리얼"),    # 푸터 CTA
     # AI 소개 제목을 두 줄로 나눔. <br> 로 나뉘므로 조각 하나가 둘이 된다.
     # 검사를 느슨하게 푸는 대신, 바뀜 모양을 그대로 적어 그대로인지 계속 본다.
     ("AI는 심판하지 않습니다 토론을 도와줍니다 ",
@@ -489,7 +489,7 @@ if _rows is not None:
 
 # 튜토리얼 버튼
 tut_links = re.findall(r'<a[^>]*data-fplay-link="guide"[^>]*>', idx)
-check("'튜토리얼 시작' %d건이 모두 guide.html 로 간다" % len(tut_links),
+check("'튜토리얼' %d건이 모두 guide.html 로 간다" % len(tut_links),
       len(tut_links) >= 2 and all('href="guide.html"' in t for t in tut_links))
 sjs = read(SITE + "/assets/js/site.js")
 check("튜토리얼 버튼을 외부 주소로 돌리지 못한다", "function isInside(" in sjs)

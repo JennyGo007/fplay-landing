@@ -6,7 +6,7 @@
 빈 링크(href="#")나 없는 주소를 남기지 않으려고 만든다.
 
   platform.html  로그인·무료로 시작·회원가입 — F-Play 플랫폼 시작 화면
-  guide.html     튜토리얼 시작 — F-Play 사용법
+  guide.html     튜토리얼 — F-Play 사용법
   privacy.html   개인정보처리방침
   terms.html     이용약관
 
