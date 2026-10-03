@@ -10,8 +10,10 @@
  *              비워 두면 영상 자리에 준비 중 안내만 나온다.
  *              유튜브로 나가지 않으므로 방문자 기록이 밖으로 나가지 않는다.
  *
- *              주소 끝에 ?v=숫자 를 붙일 수 있다. 파일을 새로 올리면 이 숫자를 바꿜다 —
- *              그래야 브라우저가 들고 있던 옛 사본을 버리고 다시 받는다.
+ *              파일 내용을 바꾸면 **이름을 같이 바꾸어** 올린다(…-720p → …-720p-v2).
+ *              주소 끝에 ?v=2 같은 것을 붙이는 방법은 쓰지 않는다 — 브라우저가
+ *              예전 guide.js 를 제 손에 들고 있으면 ?v= 를 모르고 거절해,
+ *              영상이 있는데도 ‘준비 중’ 으로 떨어진다. 이름을 바꾸면 그럴 일이 없다.
  *
  * videoPoster 재생 전에 보여 줄 장면. 없으면 재생 전에 검은 사각형만 보인다 —
  *              영상이 어두운 타이틀로 시작하면 ‘영상이 없네’ 로 보이기 쉬우니 넣어 둔다.
@@ -32,7 +34,7 @@
  */
 window.FPLAY_CONFIG = {
   platformUrl: "",
-  videoUrl: "assets/video/fplay-tutorial.mp4?v=2",
+  videoUrl: "assets/video/fplay-tutorial-720p.mp4",
   videoPoster: "assets/images/guide-video-poster.jpg",
   guideUrl: "guide.html",
   youtubeUrl: "https://youtu.be/hLXLIDa3YDQ",

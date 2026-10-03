@@ -123,7 +123,7 @@ const results = [];
 const check = (label, ok, detail = "") => results.push({ label, ok, detail });
 
 const PENDING_MARK = "F-Play 튜토리얼 영상을 준비하고 있습니다.";
-const LOCAL = "assets/video/fplay-tutorial.mp4";
+const LOCAL = "assets/video/fplay-tutorial-720p.mp4";
 const YT = "https://youtu.be/hLXLIDa3YDQ";
 const YT_ID = "hLXLIDa3YDQ";
 const POSTER = "assets/images/guide-video-poster.jpg";
@@ -209,20 +209,16 @@ for (const [why, url] of [
         "영상 자리 안에 들어갔다");
 }
 
-/* 경우 4-1 — 주소 끝의 판 번호(?v=). 캐시에 남은 옛 사본을 피하려고 붙인다. */
-{
-  const { slot } = run(LOCAL + "?v=7", "");
-  const v = slot.find("video")[0];
-  check("판 번호가 붙은 주소를 그대로 재생한다", attr(v, "src") === LOCAL + "?v=7",
-        String(attr(v, "src")));
-}
+/* 경우 4-1 — 주소에 질의문자열을 붙이지 않는다.
+ * 한때 ?v=2 로 판을 구분했는데, 브라우저가 **예전 guide.js 를 캐시에 들고 있으면**
+ * 그 코드는 ?v= 를 모르고 거절해서, 영상이 있는데도 '준비 중' 으로 떨어졌다.
+ * 판 구분은 파일 **이름**으로 한다. 이름이 바뀌면 옛 코드도 그냥 받아들인다. */
 for (const [why, url] of [
-  ["v 가 아닌 다른 변수", LOCAL + "?evil=1"],
-  ["판 번호에 경로가 섞임", LOCAL + "?v=../x"],
-  ["판 번호가 지나치게 김", LOCAL + "?v=" + "x".repeat(40)],
+  ["판 번호 질의문자열", LOCAL + "?v=2"],
+  ["다른 질의문자열", LOCAL + "?evil=1"],
 ]) {
   const { slot } = run(url, "");
-  check("판 번호를 거절한다 — " + why, slot.find("video").length === 0,
+  check("질의문자열이 붙은 주소를 거절한다 — " + why, slot.find("video").length === 0,
         "video " + slot.find("video").length + "개");
 }
 
