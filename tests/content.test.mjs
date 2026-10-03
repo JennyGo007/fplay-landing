@@ -45,3 +45,11 @@ test('guide requests content-versioned script and never embeds YouTube',async()=
   assert.match(html,/src="assets\/js\/guide\.js\?v=[a-f0-9]{16}"/);
   assert.ok(!html.includes('<iframe'));
 });
+
+test('guide requests current sizing CSS using its content hash',async()=>{
+  const {createHash}=await import('node:crypto');
+  const {readFile}=await import('node:fs/promises');
+  const hash=createHash('sha256').update(await readFile(new URL('../site/assets/css/page.css',import.meta.url))).digest('hex').slice(0,16);
+  const html=await render('guide.html',seed);
+  assert.ok(html.includes(`href="assets/css/page.css?v=${hash}"`));
+});

@@ -433,5 +433,7 @@ for name, p in PAGES.items():
         title=p["title"], desc=p["desc"], robots=p["robots"],
         cfgkey=p["cfgkey"], body=p["body"], extra_script=extra_tag,
     )
+    css_version = sha256(Path(ROOT, 'assets/css/page.css').read_bytes()).hexdigest()[:16]
+    html = html.replace('href="assets/css/page.css"', 'href="assets/css/page.css?v=' + css_version + '"')
     io.open(ROOT + "/" + name, "w", encoding="utf-8", newline="").write(html)
     print("%-16s %6d bytes" % (name, len(html.encode("utf-8"))))
