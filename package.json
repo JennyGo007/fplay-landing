@@ -1,0 +1,27 @@
+{
+  "name": "nondam-homepage",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1 --port 8099",
+    "build": "next build",
+    "start": "next start --hostname 127.0.0.1 --port 8099",
+    "test": "node --test tests/*.test.mjs",
+    "check:video": "node tools/video-check.mjs"
+  },
+  "engines": {
+    "node": ">=22.14.0"
+  },
+  "dependencies": {
+    "file-type": "^21.3.4",
+    "next": "^16.3.8",
+    "next-auth": "^4.24.15",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1"
+  }
+}

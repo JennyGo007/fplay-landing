@@ -88,6 +88,8 @@
   function mountVideo() {
     var slot = document.getElementById("guideVideo");
     if (!slot) return;
+    // 미리 생성한 플레이어를 교체하지 않아 재생 상태와 JS 없는 표시를 보존한다.
+    if (slot.getAttribute("data-static-video") === "true") return;
 
     var src = localVideo(cfg.videoUrl);
     if (!src) {

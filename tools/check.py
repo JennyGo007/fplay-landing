@@ -416,9 +416,16 @@ check("영상 자리가 16:9 를 지킨다", "aspect-ratio: 16 / 9" in read(SITE
 # 영상을 연결하자마자 검사가 실패했다. 영상이 잘못된 게 아니라 검사가 '영상 없음' 을
 # 정답으로 박아 둔 것이었다. 상태 대신 **동작**을 본다 — 아래 video-check.mjs 연결 부분.
 check("guide.html 에 미리 박아 둔 iframe 이 없다(JS 가 만든다)", "<iframe" not in guide)
-check("준비 중 안내가 HTML 에 남아 있다(영상이 없을 때 쓰는 대체 안내)",
-      "F-Play 튜토리얼 영상을 준비하고 있습니다." in guide
-      and "플랫폼의 최종 화면이 완성된 뒤 실제 이용 방법을 영상으로 안내해 드리겠습니다." in guide)
+_video_cfg = re.search(r'videoUrl:\s*"([^\"]*)"', read(SITE + "/assets/js/config.js"))
+if _video_cfg and _video_cfg.group(1):
+    check("영상 설정 시 JS 없이도 플레이어가 HTML 에 있다",
+          '<video ' in guide and 'data-static-video="true"' in guide
+          and 'src="' + _video_cfg.group(1) + '"' in guide
+          and "F-Play 튜토리얼 영상을 준비하고 있습니다." not in guide)
+else:
+    check("영상 미설정 시 준비 중 안내가 보인다",
+          "F-Play 튜토리얼 영상을 준비하고 있습니다." in guide and '<video ' not in guide)
+
 
 # 진단용 장치는 배포물에 들어가지 않는다.
 # 재생이 안 되던 원인을 찾을 때 미리보기 서버에 진단 페이지와 보고 수집(POST)을

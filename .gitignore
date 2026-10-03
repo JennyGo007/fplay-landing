@@ -14,3 +14,11 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+
+node_modules/
+.next/
+test-results/
+playwright-report/
+*.tsbuildinfo
+data/
+uploads/

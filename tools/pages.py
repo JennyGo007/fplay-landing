@@ -14,9 +14,11 @@ platform·guide 는 플랫폼 주소가 정해지기 전까지 쓰는 임시 안
 assets/js/config.js 에 주소를 넣으면 랜딩의 링크가 그 주소로 바로 넘어가고,
 이 두 페이지는 더 이상 거치지 않는다.
 """
-import io, json
+import io, json, re
+from pathlib import Path
+from urllib.parse import urlsplit, parse_qs
 
-ROOT = "C:/DataAnalysis/fplay-landing/site"
+ROOT = str(Path(__file__).resolve().parent.parent / "site")
 
 
 def load_faq(path):
@@ -147,6 +149,52 @@ VIDEO_PENDING = (
     "플랫폼의 최종 화면이 완성된 뒤 실제 이용 방법을 영상으로 안내해 드리겠습니다."
 )
 
+def video_html():
+    """설정에서 플레이어를 미리 생성해 JS 없이도 영상이 보이게 한다."""
+    raw = Path(ROOT, "assets/js/config.js").read_text(encoding="utf-8")
+    def setting(key):
+        found = re.search(r'^\s*' + re.escape(key) + r':\s*("(?:[^"\\]|\\.)*")', raw, re.M)
+        return json.loads(found.group(1)) if found else ""
+    def local(value, extensions):
+        value = value.strip()
+        if not re.fullmatch(r'[A-Za-z0-9_-]+(?:/[A-Za-z0-9_.-]+)*\.(?:' + extensions + r')', value, re.I):
+            return ""
+        if ".." in value:
+            return ""
+        return value
+    src = local(setting("videoUrl"), "mp4|webm|ogv")
+    if not src:
+        lines = VIDEO_PENDING.split("\n")
+        return ('<div class="fp-video" id="guideVideo" data-state="pending">'
+                '<p class="fp-video__pending"><strong>' + esc(lines[0]) + '</strong>'
+                + esc(lines[1]) + '</p></div>')
+    poster = local(setting("videoPoster"), "jpg|jpeg|png|webp")
+    poster_attr = ' poster="' + esc(poster) + '"' if poster else ""
+    result = ('<div class="fp-video" id="guideVideo" data-state="ready" data-static-video="true">'
+              '<video controls playsinline preload="metadata" title="F-Play 사용 방법 튜토리얼 영상"'
+              ' src="' + esc(src) + '"' + poster_attr + '>'
+              '이 브라우저에서는 영상을 재생할 수 없습니다.</video></div>'
+              '<p class="fp-video__aside"><a href="' + esc(src) + '">영상 파일 직접 열기</a></p>')
+    try:
+        url = urlsplit(setting("youtubeUrl"))
+        hosts = {"youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be", "www.youtu.be", "youtube-nocookie.com", "www.youtube-nocookie.com"}
+        parts = url.path.strip("/").split("/")
+        vid = ""
+        if url.scheme in ("http", "https") and url.hostname in hosts:
+            if url.hostname in ("youtu.be", "www.youtu.be"):
+                vid = parts[0]
+            elif parts[0] in ("embed", "shorts") and len(parts) > 1:
+                vid = parts[1]
+            elif url.path == "/watch":
+                vid = parse_qs(url.query).get("v", [""])[0]
+        if re.fullmatch(r'[A-Za-z0-9_-]{11}', vid):
+            result += ('<p class="fp-video__aside"><a href="https://www.youtube.com/watch?v='
+                       + vid + '" target="_blank" rel="noopener noreferrer">유튜브에서 보기 (새 창)</a></p>')
+    except ValueError:
+        pass
+    return result
+
+
 NOTICES = [
     "학생은 회원가입을 하지 않습니다. 교사가 전달한 초대코드로 바로 참여합니다.",
     "학생에게 실명이나 민감한 개인정보 입력을 요구하지 않습니다.",
@@ -196,12 +244,7 @@ GUIDE_BODY = """  <p class="fp-kicker">GUIDE</p>
   </p>
 
   <h2>영상으로 보기</h2>
-  <div class="fp-video" id="guideVideo" data-state="pending">
-    <p class="fp-video__pending">
-      <strong>{video_line1}</strong>
-      {video_line2}
-    </p>
-  </div>
+  {video_markup}
 
   <h2>이용 전 안내사항</h2>
   <p>수업을 시작하기 전에 이것만 알고 계시면 됩니다.</p>
@@ -248,8 +291,7 @@ PAGES["guide.html"] = dict(
     cfgkey="null",
     script="guide",
     body=GUIDE_BODY.format(
-        video_line1=esc(VIDEO_PENDING.split("\n")[0]),
-        video_line2=esc(VIDEO_PENDING.split("\n")[1]),
+        video_markup=video_html(),
         notices="\n    ".join("<li>%s</li>" % esc(t) for t in NOTICES),
         pending="\n      ".join("<li>%s</li>" % esc(t) for t in PENDING_POLICY),
         faq=faq_html(FAQ),

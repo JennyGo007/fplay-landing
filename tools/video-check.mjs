@@ -87,7 +87,7 @@ function makePage() {
   const slot = new El("div");
   slot.setAttribute("data-state", "pending");
   const p = new El("p");
-  p.textContent = inner.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  p.textContent = "F-Play 튜토리얼 영상을 준비하고 있습니다.";
   slot.appendChild(p);
   parent.appendChild(slot);
   parent.appendChild(new El("h2"));   // 영상 다음에 오는 내용
@@ -95,8 +95,9 @@ function makePage() {
 }
 
 /** guide.js 를 주어진 설정으로 한 번 돌리고, 영상 자리와 그 부모를 돌려준다. */
-function run(videoUrl, youtubeUrl = "", videoPoster = "") {
+function run(videoUrl, youtubeUrl = "", videoPoster = "", built = false) {
   const { parent, slot } = makePage();
+  if (built) { slot.textContent = ""; slot.setAttribute("data-static-video", "true"); slot.setAttribute("data-state", "ready"); const v = new El("video"); v.src = "assets/video/fplay-tutorial-720p.mp4"; v.controls = true; slot.appendChild(v); }
   const listeners = [];
   const sandbox = {
     window: { FPLAY_CONFIG: { videoUrl, youtubeUrl, videoPoster, guideUrl: "guide.html", contactEmail: "" } },
@@ -127,6 +128,14 @@ const LOCAL = "assets/video/fplay-tutorial-720p.mp4";
 const YT = "https://youtu.be/hLXLIDa3YDQ";
 const YT_ID = "hLXLIDa3YDQ";
 const POSTER = "assets/images/guide-video-poster.jpg";
+
+/* 설정 스크립트가 오래되거나 비어도 미리 생성한 플레이어는 유지한다. */
+{
+  const {slot} = run("", "", "", true);
+  check("빌드된 플레이어는 빈 설정으로도 사라지지 않는다", slot.find("video").length === 1 && slot.getAttribute("data-state") === "ready");
+  const html = readFileSync(GUIDE_HTML, "utf8");
+  check("정적 HTML 자체에 직접 재생 플레이어가 들어 있다", html.includes('<video controls') && html.includes('data-static-video="true"'));
+}
 
 /* 경우 1 — 영상 파일이 지정되지 않았다 */
 {

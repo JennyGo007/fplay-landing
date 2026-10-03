@@ -173,13 +173,12 @@
         encodeURIComponent(body);
 
       status.setAttribute("data-state", "ok");
-      status.innerHTML =
-        "메일 앱에 문의 내용을 담았습니다. 창이 열리지 않으면 " +
-        '<a href="mailto:' +
-        email +
-        '">' +
-        email +
-        "</a> 로 직접 보내주세요.";
+      status.textContent = "메일 앱에 문의 내용을 담았습니다. 창이 열리지 않으면 ";
+      var emailLink = document.createElement("a");
+      emailLink.href = "mailto:" + email;
+      emailLink.textContent = email;
+      status.appendChild(emailLink);
+      status.appendChild(document.createTextNode(" 로 직접 보내주세요."));
       window.location.href = href;
     });
   }
