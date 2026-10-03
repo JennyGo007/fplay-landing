@@ -74,6 +74,17 @@
     return v;
   }
 
+  /** 포스터도 같은 규칙으로 고른다. 확장자만 그림으로 바꾼다. */
+  function localPoster(raw) {
+    var v = String(raw || "").trim();
+    if (!v) return null;
+    if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(v)) return null;
+    if (v.indexOf("//") === 0 || v.indexOf("\\") >= 0) return null;
+    if (v.charAt(0) === "/" || v.indexOf("../") >= 0) return null;
+    if (!/\.(jpg|jpeg|png|webp)$/i.test(v)) return null;
+    return v;
+  }
+
   function mountVideo() {
     var slot = document.getElementById("guideVideo");
     if (!slot) return;
@@ -89,6 +100,10 @@
     video.src = src;
     video.controls = true;          // 재생 버튼·전체화면·음량은 브라우저 기본 컨트롤로 준다
       // 직접 만든 버튼보다 키보드·화면낭독기 대응이 확실하고, 기기마다 익숙한 모양이다.
+    // 포스터가 없으면 재생 전에 검은 사각형만 보인다.
+    // 이 영상은 어두운 타이틀로 시작해서 더 그렇게 보였다.
+    var poster = localPoster(cfg.videoPoster);
+    if (poster) video.poster = poster;
     video.preload = "metadata";     // 첫 장면과 길이만 미리 받는다. 본편은 누를 때 받는다.
     video.playsInline = true;       // 모바일에서 전체화면으로 튀어오르지 않게
     video.setAttribute("controlslist", "nodownload");

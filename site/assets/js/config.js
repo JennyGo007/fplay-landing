@@ -10,6 +10,10 @@
  *              비워 두면 영상 자리에 준비 중 안내만 나온다.
  *              유튜브로 나가지 않으므로 방문자 기록이 밖으로 나가지 않는다.
  *
+ * videoPoster 재생 전에 보여 줄 장면. 없으면 재생 전에 검은 사각형만 보인다 —
+ *              영상이 어두운 타이틀로 시작하면 ‘영상이 없네’ 로 보이기 쉬우니 넣어 둔다.
+ *              videoUrl 과 같은 규칙 — 이 묶음 안의 상대경로만 받는다.
+ *
  * youtubeUrl   **보조 링크** — ‘유튜브에서 보기’. 재생은 위 파일로 하고,
  *              여기에 주소를 적으면 영상 아래에 링크 한 줄이 더 붙는다.
  *              일반 주소(watch?v=), 단축 주소(youtu.be), embed 주소를 모두 받는다.
@@ -26,6 +30,7 @@
 window.FPLAY_CONFIG = {
   platformUrl: "",
   videoUrl: "assets/video/fplay-tutorial.mp4",
+  videoPoster: "assets/images/guide-video-poster.jpg",
   guideUrl: "guide.html",
   youtubeUrl: "https://youtu.be/hLXLIDa3YDQ",
   contactEmail: "contact@fplayground.com",

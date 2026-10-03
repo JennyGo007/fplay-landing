@@ -95,11 +95,11 @@ function makePage() {
 }
 
 /** guide.js 를 주어진 설정으로 한 번 돌리고, 영상 자리와 그 부모를 돌려준다. */
-function run(videoUrl, youtubeUrl = "") {
+function run(videoUrl, youtubeUrl = "", videoPoster = "") {
   const { parent, slot } = makePage();
   const listeners = [];
   const sandbox = {
-    window: { FPLAY_CONFIG: { videoUrl, youtubeUrl, guideUrl: "guide.html", contactEmail: "" } },
+    window: { FPLAY_CONFIG: { videoUrl, youtubeUrl, videoPoster, guideUrl: "guide.html", contactEmail: "" } },
     document: {
       readyState: "complete",
       addEventListener: (t, fn) => listeners.push(fn),
@@ -126,6 +126,7 @@ const PENDING_MARK = "F-Play 튜토리얼 영상을 준비하고 있습니다.";
 const LOCAL = "assets/video/fplay-tutorial.mp4";
 const YT = "https://youtu.be/hLXLIDa3YDQ";
 const YT_ID = "hLXLIDa3YDQ";
+const POSTER = "assets/images/guide-video-poster.jpg";
 
 /* 경우 1 — 영상 파일이 지정되지 않았다 */
 {
@@ -163,7 +164,33 @@ const YT_ID = "hLXLIDa3YDQ";
         slot.find("iframe").length + "개");
 }
 
-/* 경우 3 — 유튜브는 보조 링크로만 */
+/* 경우 3 — 포스터. 없으면 재생 전에 검은 사각형만 보인다.
+ * 이 영상은 어두운 타이틀로 시작해서, 포스터가 없으면 "영상이 없다" 로 보이기 쉽다. */
+{
+  const { slot } = run(LOCAL, "", POSTER);
+  const v = slot.find("video")[0];
+  check("포스터를 지정하면 재생 전 장면이 걸린다", attr(v, "poster") === POSTER,
+        String(attr(v, "poster")));
+}
+{
+  const { slot } = run(LOCAL, "", "");
+  const v = slot.find("video")[0];
+  check("포스터가 없어도 플레이어는 만들어진다", !!v && !attr(v, "poster"),
+        "poster=" + (v && attr(v, "poster")));
+}
+for (const [why, url] of [
+  ["바깥 호스트", "https://evil.example.com/a.jpg"],
+  ["상위 디렉터리", "../secret.png"],
+  ["절대경로", "/a.jpg"],
+  ["그림이 아닌 확장자", "assets/images/a.exe"],
+]) {
+  const { slot } = run(LOCAL, "", url);
+  const v = slot.find("video")[0];
+  check("포스터를 거절한다 — " + why, !!v && !attr(v, "poster"),
+        "poster=" + (v && attr(v, "poster")));
+}
+
+/* 경우 4 — 유튜브는 보조 링크로만 */
 {
   const { parent, slot } = run(LOCAL, YT);
   const links = parent.find("a");
@@ -182,7 +209,7 @@ const YT_ID = "hLXLIDa3YDQ";
         "영상 자리 안에 들어갔다");
 }
 
-/* 경우 4 — 거절해야 하는 영상 주소. 남의 서버로 요청이 나가는 길을 막는다. */
+/* 경우 5 — 거절해야 하는 영상 주소. 남의 서버로 요청이 나가는 길을 막는다. */
 for (const [why, url] of [
   ["바깥 호스트", "https://evil.example.com/a.mp4"],
   ["스킴 없는 바깥 주소", "//evil.example.com/a.mp4"],
@@ -199,7 +226,7 @@ for (const [why, url] of [
         "video " + slot.find("video").length + "개");
 }
 
-/* 경우 5 — 유튜브 주소가 엉뚱하면 보조 링크를 달지 않는다 */
+/* 경우 6 — 유튜브 주소가 엉뚱하면 보조 링크를 달지 않는다 */
 for (const [why, url] of [
   ["유튜브가 아닌 호스트", "https://evil.example.com/watch?v=" + YT_ID],
   ["유튜브를 닮은 호스트", "https://youtube.com.evil.example/watch?v=" + YT_ID],
@@ -210,7 +237,7 @@ for (const [why, url] of [
         parent.find("a").length + "개");
 }
 
-/* 경우 6 — **지금 config.js 에 적혀 있는 값**. 위는 가상의 주소였고 이것은 실물이다. */
+/* 경우 7 — **지금 config.js 에 적혀 있는 값**. 위는 가상의 주소였고 이것은 실물이다. */
 {
   const cfg = readFileSync(CONFIG_JS, "utf8");
   const mv = /videoUrl:\s*"([^"]*)"/.exec(cfg);
@@ -218,7 +245,8 @@ for (const [why, url] of [
   check("config.js 에서 videoUrl 을 찾는다", mv !== null);
   if (mv) {
     const url = mv[1];
-    const { slot } = run(url, my ? my[1] : "");
+    const mp = /videoPoster:\s*"([^"]*)"/.exec(cfg);
+    const { slot } = run(url, my ? my[1] : "", mp ? mp[1] : "");
     const vs = slot.find("video");
     const pending = vs.length === 0 && slot.textContent.includes(PENDING_MARK);
     const ready = vs.length === 1 && !slot.textContent.includes(PENDING_MARK)
@@ -232,6 +260,10 @@ for (const [why, url] of [
       check("설정한 영상 파일이 실제로 있다", there, url);
       if (there) {
         const bytes = statSync(file).size;
+        if (mp && mp[1]) {
+          const pf = join(ROOT, "site", mp[1]);
+          check("설정한 포스터 그림이 실제로 있다", existsSync(pf), mp[1]);
+        }
         check("영상 파일이 비어 있지 않다", bytes > 0);
         console.error("  (현재 영상: " + url + " · " + (bytes / 1048576).toFixed(1) + " MB)");
       }
