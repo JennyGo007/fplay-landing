@@ -1,0 +1,26 @@
+# 이미지에 들어가면 안 되는 것 — 비밀값과 로컬 상태
+.env
+.env.*
+!.env.example
+
+node_modules
+.next
+.git
+.github
+
+# 로컬 전용 파일
+test-results
+playwright-report
+*.tsbuildinfo
+data
+uploads
+
+# 도구와 문서는 운영 이미지에 필요 없다
+tools
+tests
+docs
+_source
+_vendor
+reports
+AGENTS.md
+CLAUDE.md
