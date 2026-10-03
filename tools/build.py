@@ -327,6 +327,11 @@ swap("/* zaemit-render.css — 렌더 계약 정적 스냅샷",
 swap("/* zaemit-editor.css — 에디터가 생성하는 공통 스타일의 단일 소스",
      "/* 공통 스타일의 단일 소스", "에디터 CSS 주석의 빌더 표기", 1)
 
+# AI 소개 제목은 두 문장을 나누어 표시한다.
+swap("AI는 심판하지 않습니다 토론을 도와줍니다&nbsp;",
+     "AI는 심판하지 않습니다<br>토론을 도와줍니다",
+     "AI 소개 제목 줄바꿈")
+
 io.open(OUT, "w", encoding="utf-8", newline="").write(s)
 print("\n".join(log))
 print("-" * 62)
