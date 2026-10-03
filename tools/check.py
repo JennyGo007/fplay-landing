@@ -420,6 +420,24 @@ check("준비 중 안내가 HTML 에 남아 있다(영상이 없을 때 쓰는 �
       "F-Play 튜토리얼 영상을 준비하고 있습니다." in guide
       and "플랫폼의 최종 화면이 완성된 뒤 실제 이용 방법을 영상으로 안내해 드리겠습니다." in guide)
 
+# 진단용 장치는 배포물에 들어가지 않는다.
+# 재생이 안 되던 원인을 찾을 때 미리보기 서버에 진단 페이지와 보고 수집(POST)을
+# 잠시 붙였다. 그것들은 scratchpad 의 도구 안에만 있고 site/ 에는 없다.
+# 실수로 흘러들어 오면 방문자 기록을 받는 경로가 공개되므로 여기서 막는다.
+_diag_hits = []
+for _p in walk(SITE):
+    _r = rel(_p)
+    if _r.endswith((".html", ".js", ".css", ".json", ".txt")):
+        _t = read(_p)
+        for _mark in ("__diag", "diag-report", "diag.html", "cachebust"):
+            if _mark in _t:
+                _diag_hits.append(_r + ":" + _mark)
+check("배포물에 진단 페이지·로그 수집 흔적이 없다", not _diag_hits, "; ".join(_diag_hits[:4]))
+check("배포물에 서버로 보내는 fetch/XHR 가 없다",
+      not any(("fetch(" in read(_p) or "XMLHttpRequest" in read(_p))
+              for _p in walk(SITE) if rel(_p).endswith((".js", ".html"))),
+      "방문자 동작을 서버로 보내는 코드가 있다")
+
 gjs = read(SITE + "/assets/js/guide.js")
 # 주석은 벗어낸다. "autoplay 를 넣지 않는다" 같은 설명 때문에
 # "autoplay 가 있다"로 읽히면, 멀쩡한 코드를 검사가 잡는다.

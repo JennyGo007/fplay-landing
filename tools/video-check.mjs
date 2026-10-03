@@ -209,6 +209,23 @@ for (const [why, url] of [
         "영상 자리 안에 들어갔다");
 }
 
+/* 경우 4-1 — 주소 끝의 판 번호(?v=). 캐시에 남은 옛 사본을 피하려고 붙인다. */
+{
+  const { slot } = run(LOCAL + "?v=7", "");
+  const v = slot.find("video")[0];
+  check("판 번호가 붙은 주소를 그대로 재생한다", attr(v, "src") === LOCAL + "?v=7",
+        String(attr(v, "src")));
+}
+for (const [why, url] of [
+  ["v 가 아닌 다른 변수", LOCAL + "?evil=1"],
+  ["판 번호에 경로가 섞임", LOCAL + "?v=../x"],
+  ["판 번호가 지나치게 김", LOCAL + "?v=" + "x".repeat(40)],
+]) {
+  const { slot } = run(url, "");
+  check("판 번호를 거절한다 — " + why, slot.find("video").length === 0,
+        "video " + slot.find("video").length + "개");
+}
+
 /* 경우 5 — 거절해야 하는 영상 주소. 남의 서버로 요청이 나가는 길을 막는다. */
 for (const [why, url] of [
   ["바깥 호스트", "https://evil.example.com/a.mp4"],
@@ -255,13 +272,13 @@ for (const [why, url] of [
           url === "" ? "빈 값인데 준비 중 안내가 안 나온다"
                      : "주소를 적었는데 플레이어가 안 만들어졌다: " + url);
     if (url !== "") {
-      const file = join(ROOT, "site", url);
+      const file = join(ROOT, "site", url.split("?")[0]);
       const there = existsSync(file);
       check("설정한 영상 파일이 실제로 있다", there, url);
       if (there) {
         const bytes = statSync(file).size;
         if (mp && mp[1]) {
-          const pf = join(ROOT, "site", mp[1]);
+          const pf = join(ROOT, "site", mp[1].split("?")[0]);
           check("설정한 포스터 그림이 실제로 있다", existsSync(pf), mp[1]);
         }
         check("영상 파일이 비어 있지 않다", bytes > 0);

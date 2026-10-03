@@ -10,6 +10,9 @@
  *              비워 두면 영상 자리에 준비 중 안내만 나온다.
  *              유튜브로 나가지 않으므로 방문자 기록이 밖으로 나가지 않는다.
  *
+ *              주소 끝에 ?v=숫자 를 붙일 수 있다. 파일을 새로 올리면 이 숫자를 바꿜다 —
+ *              그래야 브라우저가 들고 있던 옛 사본을 버리고 다시 받는다.
+ *
  * videoPoster 재생 전에 보여 줄 장면. 없으면 재생 전에 검은 사각형만 보인다 —
  *              영상이 어두운 타이틀로 시작하면 ‘영상이 없네’ 로 보이기 쉬우니 넣어 둔다.
  *              videoUrl 과 같은 규칙 — 이 묶음 안의 상대경로만 받는다.
@@ -29,7 +32,7 @@
  */
 window.FPLAY_CONFIG = {
   platformUrl: "",
-  videoUrl: "assets/video/fplay-tutorial.mp4",
+  videoUrl: "assets/video/fplay-tutorial.mp4?v=2",
   videoPoster: "assets/images/guide-video-poster.jpg",
   guideUrl: "guide.html",
   youtubeUrl: "https://youtu.be/hLXLIDa3YDQ",

@@ -64,13 +64,27 @@
    * 이 묶음 안의 상대경로만 받는다 — 바깥 주소(https://, //, 스킴 포함)를
    * 그대로 넣으면 남의 서버에 요청을 보내게 되고, 그러면 방문자 기록이
    * 밖으로 나간다. 상위 디렉터리로 빠져나가는 ../ 도 막는다. */
+  /* 주소 끝의 ?v=... 는 **판 번호**다. 파일을 새로 올리면 이 값을 바꾼다.
+   * 그래야 브라우저가 들고 있던 옛 사본을 쓰지 않고 다시 받아 간다.
+   * (받아 둔 사본이 중간에 끊긴 것이면 재생이 안 되는데, 주소가 같으면
+   *  브라우저는 서버에 묻지도 않아서 고쳐도 고쳐지지 않는 것처럼 보인다.)
+   * 캐시를 끄는 것이 아니다 — 같은 판은 그대로 캐시된다. */
+  function splitVersion(v) {
+    var q = v.indexOf("?");
+    if (q < 0) return { path: v, ok: true };
+    var query = v.slice(q + 1);
+    return { path: v.slice(0, q), ok: /^v=[A-Za-z0-9._-]{1,32}$/.test(query) };
+  }
+
   function localVideo(raw) {
     var v = String(raw || "").trim();
     if (!v) return null;
     if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(v)) return null;  // http: javascript: data: …
     if (v.indexOf("//") === 0 || v.indexOf("\\") >= 0) return null;
     if (v.charAt(0) === "/" || v.indexOf("../") >= 0) return null;
-    if (!/\.(mp4|webm|ogv)$/i.test(v)) return null;
+    var p = splitVersion(v);
+    if (!p.ok) return null;
+    if (!/\.(mp4|webm|ogv)$/i.test(p.path)) return null;
     return v;
   }
 
@@ -81,7 +95,9 @@
     if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(v)) return null;
     if (v.indexOf("//") === 0 || v.indexOf("\\") >= 0) return null;
     if (v.charAt(0) === "/" || v.indexOf("../") >= 0) return null;
-    if (!/\.(jpg|jpeg|png|webp)$/i.test(v)) return null;
+    var p = splitVersion(v);
+    if (!p.ok) return null;
+    if (!/\.(jpg|jpeg|png|webp)$/i.test(p.path)) return null;
     return v;
   }
 
