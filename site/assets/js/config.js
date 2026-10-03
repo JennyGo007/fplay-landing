@@ -21,6 +21,6 @@
 window.FPLAY_CONFIG = {
   platformUrl: "",
   guideUrl: "guide.html",
-  youtubeUrl: "",
+  youtubeUrl: "https://youtu.be/hLXLIDa3YDQ",
   contactEmail: "contact@fplayground.com",
 };
