@@ -6,7 +6,12 @@
  *              '로그인' 과 가이드 페이지의 'F-Play 시작하기' 가 이 주소로 간다.
  *              비워 두면 platform.html 안내 페이지로 간다.
  *
- * youtubeUrl   가이드 페이지에 넣을 튜토리얼 영상 주소.
+ * videoUrl    가이드 페이지에서 **직접 재생**할 영상 파일. 이 묶음 안의 경로만 받는다.
+ *              비워 두면 영상 자리에 준비 중 안내만 나온다.
+ *              유튜브로 나가지 않으므로 방문자 기록이 밖으로 나가지 않는다.
+ *
+ * youtubeUrl   **보조 링크** — ‘유튜브에서 보기’. 재생은 위 파일로 하고,
+ *              여기에 주소를 적으면 영상 아래에 링크 한 줄이 더 붙는다.
  *              일반 주소(watch?v=), 단축 주소(youtu.be), embed 주소를 모두 받는다.
  *              비워 두면 영상 자리에 준비 중 안내만 나온다. 빈 iframe 도,
  *              외부 요청도 만들지 않는다. 유튜브가 아닌 주소는 무시한다.
@@ -20,6 +25,7 @@
  */
 window.FPLAY_CONFIG = {
   platformUrl: "",
+  videoUrl: "assets/video/fplay-tutorial.mp4",
   guideUrl: "guide.html",
   youtubeUrl: "https://youtu.be/hLXLIDa3YDQ",
   contactEmail: "contact@fplayground.com",

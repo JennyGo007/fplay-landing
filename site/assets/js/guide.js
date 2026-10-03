@@ -1,8 +1,13 @@
 /* 가이드 페이지 동작 — 영상 넣기와 질문 펼치기.
  *
- * 영상 주소는 config.js 의 youtubeUrl 한 곳에서만 온다. 이 파일에도, HTML 에도
- * 주소를 적지 않는다. 주소가 비어 있으면 iframe 을 아예 만들지 않는다.
- * 빈 iframe 은 그 자체로 외부 요청이 되기 때문이다.
+ * 영상은 **우리 파일을 직접 재생**한다(config.js 의 videoUrl).
+ * 유튜브 embed 를 쓰지 않는 이유 — 페이지를 여는 것만으로 방문자 기록이
+ * 밖으로 나가지 않게 하기 위해서다. 유튜브는 ‘유튜브에서 보기’ 보조 링크로만 남긴다.
+ *
+ * 주소는 config.js 한 곳에서만 온다. 이 파일에도, HTML 에도 주소를 적지 않는다.
+ * 주소가 비어 있으면 플레이어를 아예 만들지 않고 준비 중 안내를 그대로 둔다.
+ *
+ * 자동재생은 하지 않는다. 보는 사람이 재생 버튼을 눌렀을 때만 재생된다.
  */
 (function () {
   "use strict";
@@ -55,29 +60,57 @@
     return id && ID_RE.test(id) ? id : null;
   }
 
+  /* 재생할 영상 파일 주소를 고른다.
+   * 이 묶음 안의 상대경로만 받는다 — 바깥 주소(https://, //, 스킴 포함)를
+   * 그대로 넣으면 남의 서버에 요청을 보내게 되고, 그러면 방문자 기록이
+   * 밖으로 나간다. 상위 디렉터리로 빠져나가는 ../ 도 막는다. */
+  function localVideo(raw) {
+    var v = String(raw || "").trim();
+    if (!v) return null;
+    if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(v)) return null;  // http: javascript: data: …
+    if (v.indexOf("//") === 0 || v.indexOf("\\") >= 0) return null;
+    if (v.charAt(0) === "/" || v.indexOf("../") >= 0) return null;
+    if (!/\.(mp4|webm|ogv)$/i.test(v)) return null;
+    return v;
+  }
+
   function mountVideo() {
     var slot = document.getElementById("guideVideo");
     if (!slot) return;
 
-    var id = videoId(cfg.youtubeUrl);
-    if (!id) {
-      // 주소가 없거나 유튜브가 아니다. 안내 문구는 HTML 에 이미 있으므로 그대로 둔다.
+    var src = localVideo(cfg.videoUrl);
+    if (!src) {
+      // 영상이 없다. 안내 문구는 HTML 에 이미 있으므로 그대로 둔다.
       slot.setAttribute("data-state", "pending");
       return;
     }
 
-    var frame = document.createElement("iframe");
-    frame.src = "https://www.youtube-nocookie.com/embed/" + id;
-    frame.title = "F-Play 사용 방법 튜토리얼 영상";
-    frame.loading = "lazy";
-    frame.referrerPolicy = "strict-origin-when-cross-origin";
-    frame.allow = "accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-    frame.allowFullscreen = true;
-    frame.setAttribute("frameborder", "0");
+    var video = document.createElement("video");
+    video.src = src;
+    video.controls = true;          // 재생 버튼·전체화면·음량은 브라우저 기본 컨트롤로 준다
+      // 직접 만든 버튼보다 키보드·화면낭독기 대응이 확실하고, 기기마다 익숙한 모양이다.
+    video.preload = "metadata";     // 첫 장면과 길이만 미리 받는다. 본편은 누를 때 받는다.
+    video.playsInline = true;       // 모바일에서 전체화면으로 튀어오르지 않게
+    video.setAttribute("controlslist", "nodownload");
+    video.title = "F-Play 사용 방법 튜토리얼 영상";
+    // 자동재생하지 않는다. autoplay·muted 를 일부러 넣지 않는다.
 
     slot.setAttribute("data-state", "ready");
-    slot.textContent = "";      // 준비 중 안내를 걷어낸다
-    slot.appendChild(frame);
+    slot.textContent = "";          // 준비 중 안내를 걷어낸다
+    slot.appendChild(video);
+
+    // 유튜브는 보조 링크로만. 누를 때만 밖으로 나간다.
+    var id = videoId(cfg.youtubeUrl);
+    if (!id) return;
+    var aside = document.createElement("p");
+    aside.className = "fp-video__aside";
+    var a = document.createElement("a");
+    a.href = "https://www.youtube.com/watch?v=" + id;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.textContent = "유튜브에서 보기 (새 창)";
+    aside.appendChild(a);
+    if (slot.parentNode) slot.parentNode.insertBefore(aside, slot.nextSibling);
   }
 
   /* ── 질문 접고 펴기 ───────────────────────────────────────────────────

@@ -13,6 +13,13 @@
 """
 import io, os, re, sys, html, json
 
+# 콘솔이 cp949 면 — 같은 문자에서 출력이 터졌다. 검사가 할 말이 생겼을 때
+# 하필 죽는 셈이라, 읽을 수 있는 형태로 바꿔 써서라도 보고하게 한다.
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
+
 ROOT = "C:/DataAnalysis/fplay-landing"
 SITE = ROOT + "/site"
 SRC = ROOT + "/_source/index-original.html"
@@ -93,13 +100,14 @@ for p in TEXT:
         ext.append("%s: %s" % (rel(p), m.group(2)))
     for m in re.finditer(r'(?:@import\s+)?url\(["\']?(https?:)?//([^)"\']+)', body):
         ext.append("%s: url() %s" % (rel(p), m.group(2)))
-# 튜토리얼 영상만 예외다. guide.js 가 유튜브 embed 주소를 만들어 iframe 에 넣는다.
-# 설정에 주소가 채워졌을 때만 만들고, 다른 호스트는 코드가 거절한다.
-YT_OK = "assets/js/guide.js: www.youtube-nocookie.com"
+# 유튜브 주소 하나만 예외다. 영상은 우리 파일로 재생하므로 페이지를 여는 것만으로는
+# 밖으로 요청이 나가지 않는다. 이 주소는 ‘유튜브에서 보기’ 보조 링크에 들어가는 값이고,
+# 방문자가 **눌렀을 때만** 나간다. 불러오는 자원이 아니다.
+YT_OK = "assets/js/guide.js: www.youtube.com"
 yt = [x for x in ext if x == YT_OK]
 ext = [x for x in ext if x != YT_OK]
-check("영상 말고 외부에서 받아오는 src/href/url() 0건", not ext, "; ".join(ext[:6]))
-check("유튜브 embed 는 가이드의 영상 자리 하나뿐이다", len(yt) == 1, "%d건" % len(yt))
+check("페이지를 여는 것만으로 받아오는 외부 자원 0건", not ext, "; ".join(ext[:6]))
+check("유튜브는 보조 링크 한 곳뿐이다", len(yt) == 1, "%d건" % len(yt))
 print("  참고  SVG 네임스페이스 %d건은 네트워크 요청이 아니다"
       % sum(read(p).count("http://www.w3.org/2000/svg") for p in TEXT))
 
@@ -282,14 +290,20 @@ BRAND_EDITS = [
     ("논담 ", "NONDAM : F-Play"),   # 푸터 서비스명
     ("NONDAM", None),              # 푸터 부제
     ("회원가입", "튜토리얼 시작"),    # 푸터 CTA
+    # AI 소개 제목을 두 줄로 나눔. <br> 로 나뉘므로 조각 하나가 둘이 된다.
+    # 검사를 느슨하게 푸는 대신, 바뀜 모양을 그대로 적어 그대로인지 계속 본다.
+    ("AI는 심판하지 않습니다 토론을 도와줍니다 ",
+     ["AI는 심판하지 않습니다", "토론을 도와줍니다"]),
 ]
 want = list(visible(read(SRC)))
 for old, new in BRAND_EDITS:
     k = want.index(old)
     if new is None:
-        want.pop(k)
+        want.pop(k)          # 조각을 없앤다(글자 → 이미지 등)
+    elif isinstance(new, list):
+        want[k:k + 1] = new  # 조각 하나를 여럿으로 나눈다(<br> 로 줄 나눔)
     else:
-        want[k] = new
+        want[k] = new        # 조각을 다른 말로 바꾼다
 got = visible(idx)
 
 # 원본 조각이 하나도 빠지지 않고 순서대로 남아 있는지 본다.
@@ -398,20 +412,55 @@ check("가이드도 기본 펼침이다", guide.count('aria-expanded="true"') ==
 
 # 영상
 check("영상 자리가 16:9 를 지킨다", "aspect-ratio: 16 / 9" in read(SITE + "/assets/css/page.css"))
-check("영상 주소가 비어 있다(준비 중)", 'youtubeUrl: ""' in read(SITE + "/assets/js/config.js"))
-check("영상 주소가 없으면 iframe 을 만들지 않는다", "<iframe" not in guide)
-check("준비 중 안내가 화면에 있다",
+# 주소가 비었는지를 보지 **않는다.** 예전에는 'youtubeUrl: ""' 라는 글자를 찾았고, 그래서
+# 영상을 연결하자마자 검사가 실패했다. 영상이 잘못된 게 아니라 검사가 '영상 없음' 을
+# 정답으로 박아 둔 것이었다. 상태 대신 **동작**을 본다 — 아래 video-check.mjs 연결 부분.
+check("guide.html 에 미리 박아 둔 iframe 이 없다(JS 가 만든다)", "<iframe" not in guide)
+check("준비 중 안내가 HTML 에 남아 있다(영상이 없을 때 쓰는 대체 안내)",
       "F-Play 튜토리얼 영상을 준비하고 있습니다." in guide
       and "플랫폼의 최종 화면이 완성된 뒤 실제 이용 방법을 영상으로 안내해 드리겠습니다." in guide)
 
 gjs = read(SITE + "/assets/js/guide.js")
-check("유튜브 주소만 받아들인다(호스트 확인)", "HOSTS" in gjs and "youtube.com" in gjs)
-check("영상 id 모양을 확인한다", "ID_RE" in gjs and "{11}" in gjs)
-check("주소를 그대로 쓰지 않고 embed 주소를 다시 만든다",
-      'youtube-nocookie.com/embed/" + id' in gjs)
-check("iframe 에 title·지연 로딩·보안 속성을 건다",
-      'frame.title' in gjs and 'frame.loading = "lazy"' in gjs
-      and "referrerPolicy" in gjs and "allowFullscreen" in gjs)
+# 주석은 벗어낸다. "autoplay 를 넣지 않는다" 같은 설명 때문에
+# "autoplay 가 있다"로 읽히면, 멀쩡한 코드를 검사가 잡는다.
+gjs_code = re.sub(r"/\*.*?\*/", " ", gjs, flags=re.S)
+gjs_code = re.sub(r"(?m)//.*$", " ", gjs_code)
+check("유튜브 주소만 받아들인다(호스트 확인)", "HOSTS" in gjs_code and "youtube.com" in gjs_code)
+check("영상 id 모양을 확인한다", "ID_RE" in gjs_code and "{11}" in gjs_code)
+check("영상은 우리 파일로 재생한다(iframe 을 아예 만들지 않는다)",
+      'createElement("video")' in gjs_code and 'createElement("iframe")' not in gjs_code)
+check("묶음 안의 상대경로만 재생한다(바깥 주소·상위 경로 거절)",
+      "function localVideo" in gjs_code and 'indexOf("../")' in gjs_code)
+check("재생 버튼·전체화면을 주고 자동재생은 하지 않는다",
+      "video.controls = true" in gjs_code
+      and "autoplay" not in gjs_code and ".muted" not in gjs_code)
+check("처음부터 전체를 내려받지 않는다(preload=metadata)",
+      'video.preload = "metadata"' in gjs_code)
+check("유튜브는 새 창 보조 링크로만 남는다",
+      'a.target = "_blank"' in gjs_code and "noopener" in gjs_code
+      and "fp-video__aside" in gjs_code)
+check("영상 자리에 <video> 스타일이 있다",
+      ".fp-video video" in read(SITE + "/assets/css/page.css"))
+
+# 위까지는 소스에 그 낱말이 있는가를 본 것이다. 아래는 guide.js 를 **실제로 돌려**
+# 주소가 비었을 때와 있을 때 화면이 어떻게 되는지 두 경우를 모두 본다.
+# node 가 필요하고, 없으면 조용히 넘기지 않고 실패로 알린다 —
+# 건너뛴 것을 통과로 읽으면 검사가 있나 마나다.
+import subprocess
+try:
+    _p = subprocess.run(["node", ROOT + "/tools/video-check.mjs", "--json"],
+                        capture_output=True, text=True, encoding="utf-8", timeout=120)
+    _rows = json.loads(_p.stdout) if _p.stdout.strip() else []
+except FileNotFoundError:
+    _rows = None
+    check("영상 동작 검사를 돌렸다", False, "node 를 찾지 못했다")
+except Exception as _e:
+    _rows = None
+    check("영상 동작 검사를 돌렸다", False, str(_e)[:80])
+if _rows is not None:
+    check("영상 동작 검사가 비어 있지 않다", len(_rows) > 0, "0건")
+    for _r in _rows:
+        check("[영상] " + _r["label"], _r["ok"], _r.get("detail", ""))
 
 # 튜토리얼 버튼
 tut_links = re.findall(r'<a[^>]*data-fplay-link="guide"[^>]*>', idx)

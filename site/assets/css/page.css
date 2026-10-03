@@ -239,12 +239,31 @@ th {
   background: var(--fp-soft);
   overflow: hidden;
 }
-.fp-video iframe {
+.fp-video iframe,
+.fp-video video {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   border: 0;
+}
+/* 영상은 16:9 자리를 꽉 채우되 잘리지 않게 넣는다.
+   cover 로 두면 비율이 다른 영상의 위아래가 나가므로 contain 이다. */
+.fp-video video {
+  object-fit: contain;
+  background: #000;
+}
+/* ‘유튜브에서 보기’ — 재생은 위 플레이어가 하고 이건 보조 링크다. */
+.fp-video__aside {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+.fp-video__aside a {
+  color: var(--fp-muted);
+  text-decoration: underline;
+}
+.fp-video__aside a:hover {
+  color: var(--fp-ink);
 }
 .fp-video__pending {
   position: absolute;
