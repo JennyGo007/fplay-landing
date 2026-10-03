@@ -15,6 +15,7 @@ assets/js/config.js 에 주소를 넣으면 랜딩의 링크가 그 주소로 �
 이 두 페이지는 더 이상 거치지 않는다.
 """
 import io, json, re
+from hashlib import sha256
 from pathlib import Path
 from urllib.parse import urlsplit, parse_qs
 
@@ -426,7 +427,8 @@ for name, p in PAGES.items():
     extra = p.get("script")
     extra_tag = ""
     if extra:
-        extra_tag = chr(10) + '<script src="assets/js/' + extra + '.js"></script>'
+        version = sha256(Path(ROOT, 'assets/js/' + extra + '.js').read_bytes()).hexdigest()[:16]
+        extra_tag = chr(10) + '<script src="assets/js/' + extra + '.js?v=' + version + '"></script>'
     html = SHELL.format(
         title=p["title"], desc=p["desc"], robots=p["robots"],
         cfgkey=p["cfgkey"], body=p["body"], extra_script=extra_tag,

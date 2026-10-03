@@ -39,3 +39,9 @@ test('draft isolation, conflict detection, history restore, durable storage',asy
 test('data directory cannot be public repository storage',()=>{
   process.env.DATA_DIR=path.join(process.cwd(),'site/data');assert.throws(dataDir);delete process.env.DATA_DIR;
 });
+
+test('guide requests content-versioned script and never embeds YouTube',async()=>{
+  const html=await render('guide.html',seed);
+  assert.match(html,/src="assets\/js\/guide\.js\?v=[a-f0-9]{16}"/);
+  assert.ok(!html.includes('<iframe'));
+});
