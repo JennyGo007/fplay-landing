@@ -100,14 +100,22 @@ for p in TEXT:
         ext.append("%s: %s" % (rel(p), m.group(2)))
     for m in re.finditer(r'(?:@import\s+)?url\(["\']?(https?:)?//([^)"\']+)', body):
         ext.append("%s: url() %s" % (rel(p), m.group(2)))
-# 유튜브 주소 하나만 예외다. 영상은 우리 파일로 재생하므로 페이지를 여는 것만으로는
+# 유튜브 주소는 예외다. 영상은 우리 파일로 재생하므로 페이지를 여는 것만으로는
 # 밖으로 요청이 나가지 않는다. 이 주소는 ‘유튜브에서 보기’ 보조 링크에 들어가는 값이고,
 # 방문자가 **눌렀을 때만** 나간다. 불러오는 자원이 아니다.
-YT_OK = "assets/js/guide.js: www.youtube.com"
-yt = [x for x in ext if x == YT_OK]
-ext = [x for x in ext if x != YT_OK]
+# 영상을 서버가 미리 그려 넣도록 바꾸면서 같은 링크가 guide.html 에도 생겼다.
+# guide.js 는 설정으로 영상을 붙일 때 쓰는 대비 경로다. 둘 다 <a> 다.
+YT_OK = {"assets/js/guide.js: www.youtube.com", "guide.html: www.youtube.com"}
+yt = [x for x in ext if x in YT_OK]
+ext = [x for x in ext if x not in YT_OK]
 check("페이지를 여는 것만으로 받아오는 외부 자원 0건", not ext, "; ".join(ext[:6]))
-check("유튜브는 보조 링크 한 곳뿐이다", len(yt) == 1, "%d건" % len(yt))
+# 몇 곳인지 세는 것보다 '불러오지 않는다'를 직접 보는 편이 낫다.
+# iframe·script·img 로 들어가는 순간 그건 실제로 나가는 요청이다.
+embeds = [rel(p) for p in HTML
+          if re.search(r"<(?:iframe|script|img)[^>]*youtu", read(p), re.I)]
+check("유튜브는 눌러야 나가는 보조 링크뿐이다 (embed 0건)",
+      len(yt) == len(YT_OK) and not embeds,
+      "링크 %d건; embed %s" % (len(yt), embeds or "없음"))
 print("  참고  SVG 네임스페이스 %d건은 네트워크 요청이 아니다"
       % sum(read(p).count("http://www.w3.org/2000/svg") for p in TEXT))
 
@@ -286,6 +294,7 @@ BRAND_EDITS = [
     ("논담", "NONDAM : F-Play"),    # 헤더 서비스명
     ("NONDAM", None),              # 헤더 부제
     ("무료로 시작", "튜토리얼"),  # 헤더 CTA
+    ("튜토리얼 시작", "튜토리얼"),  # 히어로 CTA — 세 버튼 문구를 짧게 통일(502eca2)
     ("論", None),                  # 푸터 심벌 → 이미지
     ("논담 ", "NONDAM : F-Play"),   # 푸터 서비스명
     ("NONDAM", None),              # 푸터 부제
