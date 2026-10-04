@@ -113,3 +113,21 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* AI 중재 섹션의 사진 — 작은 화면에서 잘려 보이던 것을 고친다.
+   사진은 1080x1620(세로 2:3)인데 상자가 가로 3/2 로 고정돼 있어
+   object-fit:cover 가 위아래를 절반 가까이 잘라냈다.
+   작은 화면에서는 상자를 사진 비율에 맞춰 전체가 보이게 한다.
+   인라인 <style> 이 뒤에 오므로 선택자를 한 단계 더 좁혀 우선순위를 올린다. */
+@media (max-width: 991.98px) {
+  .zs-page-block .zs-rn2serimc-4 {
+    aspect-ratio: 2 / 3;
+    height: auto;
+    /* 태블릿 폭에서 사진이 1400px 넘게 솟지 않도록 가로를 묶는다 */
+    max-width: 420px;
+    margin-inline: auto;
+  }
+  .zs-page-block .zs-rn2serimc-4 img {
+    object-fit: contain;
+  }
+}
