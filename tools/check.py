@@ -574,6 +574,16 @@ check("컨테이너 기동이 0.0.0.0 에 붙는다",
 check("로컬 start 는 127.0.0.1 을 유지한다",
       '"start": "next start --hostname 127.0.0.1' in pkg)
 
+# 방문자에게 내부 설정 방법을 보여 주지 않는다 — 안내 페이지에서 걷어낸 것과 같은 잘못.
+shown = re.findall(r"(?:textContent|innerText)\s*=\s*\"([^\"]*)\"", sjs)
+check("문의 폼 오류 문구가 설정 파일을 들먹이지 않는다",
+      not [t for t in shown if "config.js" in t or "assets/js" in t],
+      "방문자에게 내부 설정 방법이 보인다")
+# 보내지 않았는데 '접수 완료' 로 읽히면 안 된다. 메일 앱을 여는 방식이기 때문이다.
+check("문의 결과를 '접수·전송 완료' 로 말하지 않는다",
+      "메일 앱에 문의 내용을 담았습니다" in sjs
+      and not any(w in sjs for w in ["접수되었습니다", "접수 완료", "전송되었습니다", "발송되었습니다"]))
+
 print("\n" + "=" * 62)
 print("통과 %d건 / 실패 %d건" % (oks, len(fails)))
 for f in fails:
