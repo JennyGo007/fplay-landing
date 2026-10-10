@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" sizes="16x16" href="assets/brand/favicon-16.png">
 <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
 <link rel="stylesheet" href="assets/css/fonts.css">
-<link rel="stylesheet" href="assets/css/page.css">
+<link rel="stylesheet" href="assets/css/page.css?v=7a5e74073101a1a9">
 </head>
 <body>
 <header class="fp-head">
@@ -28,10 +28,12 @@
     로그인과 수업 개설은 랜딩페이지가 아니라 F-Play 플랫폼에서 합니다.
     교사는 계정으로 로그인해 수업을 만들고, 학생은 교사가 발급한 초대코드로 들어갑니다.
   </p>
+  <div class="fp-actions" id="fpEnter" hidden>
+    <a class="fp-btn" href="platform.html" data-fplay-link="platform">F-Play 플랫폼으로 이동</a>
+  </div>
   <div class="fp-note" id="fpTarget">
-    <strong>주소는 아직 정해지지 않았습니다.</strong>
-    확정되면 <code>assets/js/config.js</code> 의 <code>platformUrl</code> 한 줄만 채우면 됩니다.
-    그때부터 랜딩페이지의 링크는 이 안내 페이지를 거치지 않고 곧바로 해당 주소로 갑니다.
+    <strong>이용 주소가 아직 연결되지 않았습니다.</strong>
+    잠시 뒤 다시 시도해 주시거나, 아래 도입 문의로 알려 주세요.
   </div>
   <div class="fp-actions">
     <a class="fp-btn fp-btn--ghost" href="index.html">랜딩페이지로 돌아가기</a>
@@ -41,7 +43,6 @@
   <h2>여기로 오게 되는 링크</h2>
   <ul>
     <li>헤더와 푸터의 <b>로그인</b></li>
-    <li>헤더의 <b>무료로 시작</b>, 푸터의 <b>회원가입</b></li>
     <li>모바일 메뉴의 서비스 화면 링크 — 논제와 자료, 토론방, 논술 제출, 학습 홈,
         교사 진행 안내, 토론 리포트, 쟁점 보드, 내 학습 기록</li>
   </ul>
@@ -64,18 +65,25 @@
 <script src="assets/js/config.js"></script>
 <script src="assets/js/faq-data.js"></script>
 <script>
-/* config.js 에 주소가 채워지면 이 안내 페이지 대신 실제 주소로 바로 보낸다.
-   비어 있으면 아무 일도 하지 않는다. */
+/* 주소가 설정돼 있으면 이동 버튼을 보이고, 연결 안내를 감춘다.
+   주소를 **글자로 보여 주지 않는다** — 누를 수 있는 버튼이 하는 일이다.
+   자동으로 보내지도 않는다: 뒤로 가기가 이 페이지로 되돌아와 다시 튕기는 고리가 된다. */
 (function(){
   var cfg = window.FPLAY_CONFIG || {};
   var key = "platformUrl";
   if (!key) return;
   var url = (cfg[key] || "").trim();
   if (!url) return;
-  var box = document.getElementById("fpTarget");
-  if (box) {
-    box.textContent = "주소가 설정되어 있습니다: " + url;
+  var enter = document.getElementById("fpEnter");
+  var link = enter && enter.querySelector('[data-fplay-link="platform"]');
+  if (link) {
+    link.setAttribute("href", url);
+    link.setAttribute("target", "_blank");
+    link.setAttribute("rel", "noopener");
   }
+  if (enter) enter.hidden = false;
+  var box = document.getElementById("fpTarget");
+  if (box) box.hidden = true;
 })();
 </script>
 </body>

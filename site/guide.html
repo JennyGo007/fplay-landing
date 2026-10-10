@@ -114,20 +114,27 @@
 <script src="assets/js/config.js"></script>
 <script src="assets/js/faq-data.js"></script>
 <script>
-/* config.js 에 주소가 채워지면 이 안내 페이지 대신 실제 주소로 바로 보낸다.
-   비어 있으면 아무 일도 하지 않는다. */
+/* 주소가 설정돼 있으면 이동 버튼을 보이고, 연결 안내를 감춘다.
+   주소를 **글자로 보여 주지 않는다** — 누를 수 있는 버튼이 하는 일이다.
+   자동으로 보내지도 않는다: 뒤로 가기가 이 페이지로 되돌아와 다시 튕기는 고리가 된다. */
 (function(){
   var cfg = window.FPLAY_CONFIG || {};
   var key = null;
   if (!key) return;
   var url = (cfg[key] || "").trim();
   if (!url) return;
-  var box = document.getElementById("fpTarget");
-  if (box) {
-    box.textContent = "주소가 설정되어 있습니다: " + url;
+  var enter = document.getElementById("fpEnter");
+  var link = enter && enter.querySelector('[data-fplay-link="platform"]');
+  if (link) {
+    link.setAttribute("href", url);
+    link.setAttribute("target", "_blank");
+    link.setAttribute("rel", "noopener");
   }
+  if (enter) enter.hidden = false;
+  var box = document.getElementById("fpTarget");
+  if (box) box.hidden = true;
 })();
 </script>
-<script src="assets/js/guide.js?v=fa821165fc03c0d3"></script>
+<script src="assets/js/guide.js?v=b511e8af77cc2ff5"></script>
 </body>
 </html>

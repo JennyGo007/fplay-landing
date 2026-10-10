@@ -525,6 +525,45 @@ check("문의 폼 알림이 사용자 입력을 HTML 로 넣지 않는다",
       "status.textContent" in sjs and "+ name +" not in sjs.split("status.innerHTML")[1][:200]
       if "status.innerHTML" in sjs else True)
 
+# ────────────────────────────────────────────────────────────────
+# 안내 페이지 — 직접 들어온 사람도 플랫폼으로 갈 수 있어야 한다
+#
+# 전에는 "주소는 아직 정해지지 않았습니다" 와 함께 config.js 를 고치라는 **내부 설정
+# 방법**이 방문자에게 보였고, 실제로 갈 버튼은 없었다. 둘 다 되돌아오면 안 된다.
+platform_html = read(SITE + "/platform.html")
+platform_main = platform_html.split("<body>")[1].split("</main>")[0]
+check("안내 페이지 본문에 내부 설정 방법이 노출되지 않는다",
+      "config.js" not in platform_main and "platformUrl" not in platform_main,
+      "방문자가 보는 본문에 설정 방법이 남아 있다")
+check("안내 페이지에 '주소 미정' 문구가 없다",
+      "주소는 아직 정해지지 않았습니다" not in platform_html)
+enter_btn = re.search(r'<a[^>]*data-fplay-link="platform"[^>]*>[^<]*</a>', platform_html)
+check("안내 페이지에 플랫폼으로 가는 버튼이 있다", bool(enter_btn),
+      enter_btn.group(0)[:80] if enter_btn else "")
+check("그 버튼이 주소를 박아 두지 않는다 (서버가 치환한다)",
+      bool(enter_btn) and 'href="platform.html"' in enter_btn.group(0))
+check("안내 페이지에 없어진 '무료로 시작·회원가입' 설명이 없다",
+      "무료로 시작" not in platform_html and "푸터의 <b>회원가입</b>" not in platform_html)
+
+# ────────────────────────────────────────────────────────────────
+# 시범 운영 안내 — **코드에 있어야 한다**
+#
+# 관리자 콘텐츠에 두면 실수로 지워질 수 있고, 그러면 참여 대상을 밝히지 않은 채로
+# 사이트가 돌아간다. 확정되지 않은 것(보관기간·외부 AI 처리)은 약속하지 않는다.
+render_src = read(ROOT + "/lib/render.mjs")
+check("시범 운영 안내가 렌더러에 있다",
+      "cms-pilot" in render_src and "pilotNotice" in render_src)
+for phrase in ["사전 승인된 성인", "AI 기능을 켜지 않았습니다", "앞으로의 계획"]:
+    check("안내 문구: %s" % phrase, phrase in render_src)
+check("안내가 랜딩·가이드·안내 페이지 모두에 붙는다",
+      "['index.html','guide.html','platform.html'].includes(file)" in render_src)
+check("안내 문구가 확정되지 않은 보관기간을 약속하지 않는다",
+      "보관기간" not in render_src.split("pilotNotice")[1].split("';")[0])
+
+check("관리자 링크 이름이 F-Play 관리와 구분된다",
+      ">홈페이지 관리</a>" in render_src and ">관리자 로그인</a>" not in render_src,
+      "두 /admin 을 같은 이름으로 부르면 어디로 가는지 알 수 없다")
+
 print("\n" + "=" * 62)
 print("통과 %d건 / 실패 %d건" % (oks, len(fails)))
 for f in fails:

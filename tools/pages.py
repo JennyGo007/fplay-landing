@@ -5,14 +5,17 @@
 랜딩페이지에서 나가던 링크 중, 같은 페이지 안의 섹션으로 돌릴 수 없는 것들의 도착지다.
 빈 링크(href="#")나 없는 주소를 남기지 않으려고 만든다.
 
-  platform.html  로그인·무료로 시작·회원가입 — F-Play 플랫폼 시작 화면
+  platform.html  로그인 — F-Play 플랫폼으로 가는 안내
   guide.html     튜토리얼 — F-Play 사용법
   privacy.html   개인정보처리방침
   terms.html     이용약관
 
-platform·guide 는 플랫폼 주소가 정해지기 전까지 쓰는 임시 안내다.
-assets/js/config.js 에 주소를 넣으면 랜딩의 링크가 그 주소로 바로 넘어가고,
-이 두 페이지는 더 이상 거치지 않는다.
+**주소를 넣는 자리는 관리자 화면이다**('연결·연락처' 탭의 '논담 플랫폼 주소').
+거기 값이 들어가면 `lib/render.mjs` 가 랜딩·가이드의 로그인 링크를 그 주소로 치환해,
+방문자는 platform.html 을 거치지 않는다. `assets/js/config.js` 는 **정적 기본값**일 뿐이다.
+
+platform.html 은 없어지지 않는다 — 즐겨찾기나 옛 링크로 **직접** 오는 사람이 있고,
+그 사람도 플랫폼으로 갈 수 있어야 한다. guide.html 은 튜토리얼로 계속 쓴다.
 """
 import io, json, re
 from hashlib import sha256
@@ -80,28 +83,44 @@ SHELL = """<!doctype html>
 <script src="assets/js/config.js"></script>
 <script src="assets/js/faq-data.js"></script>
 <script>
-/* config.js 에 주소가 채워지면 이 안내 페이지 대신 실제 주소로 바로 보낸다.
-   비어 있으면 아무 일도 하지 않는다. */
+/* 주소가 설정돼 있으면 이동 버튼을 보이고, 연결 안내를 감춘다.
+   주소를 **글자로 보여 주지 않는다** — 누를 수 있는 버튼이 하는 일이다.
+   자동으로 보내지도 않는다: 뒤로 가기가 이 페이지로 되돌아와 다시 튕기는 고리가 된다. */
 (function(){{
   var cfg = window.FPLAY_CONFIG || {{}};
   var key = {cfgkey};
   if (!key) return;
   var url = (cfg[key] || "").trim();
   if (!url) return;
-  var box = document.getElementById("fpTarget");
-  if (box) {{
-    box.textContent = "주소가 설정되어 있습니다: " + url;
+  var enter = document.getElementById("fpEnter");
+  var link = enter && enter.querySelector('[data-fplay-link="platform"]');
+  if (link) {{
+    link.setAttribute("href", url);
+    link.setAttribute("target", "_blank");
+    link.setAttribute("rel", "noopener");
   }}
+  if (enter) enter.hidden = false;
+  var box = document.getElementById("fpTarget");
+  if (box) box.hidden = true;
 }})();
 </script>{extra_script}
 </body>
 </html>
 """
 
-PLACEHOLDER_NOTE = """  <div class="fp-note" id="fpTarget">
-    <strong>주소는 아직 정해지지 않았습니다.</strong>
-    확정되면 <code>assets/js/config.js</code> 의 <code>{key}</code> 한 줄만 채우면 됩니다.
-    그때부터 랜딩페이지의 링크는 이 안내 페이지를 거치지 않고 곧바로 해당 주소로 갑니다.
+# 이 페이지에 **직접** 들어온 사람도 플랫폼으로 갈 수 있어야 한다.
+# 전에는 "주소는 아직 정해지지 않았습니다" 와 함께 `config.js` 를 고치라는
+# **내부 설정 방법**이 방문자에게 그대로 보였다. 두 가지가 잘못이었다 —
+# 방문자가 알 필요 없는 내용이고, 실제 설정 자리는 관리자 화면이라 사실도 아니다.
+#
+# 버튼은 랜딩의 다른 로그인 버튼과 **같은 표식**(data-fplay-link="platform")을 쓴다.
+# 그래야 서버(lib/render.mjs)가 한 자리에서 주소를 치환한다. 주소를 여기 적지 않는다.
+PLACEHOLDER_NOTE = """  <div class="fp-actions" id="fpEnter" hidden>
+    <a class="fp-btn" href="platform.html" data-fplay-link="platform">F-Play 플랫폼으로 이동</a>
+  </div>
+  <div class="fp-note" id="fpTarget">
+    <strong>이용 주소가 아직 연결되지 않았습니다.</strong>
+    잠시 뒤 다시 시도해 주시거나, 아래 도입 문의로 알려 주세요.
   </div>
   <div class="fp-actions">
     <a class="fp-btn fp-btn--ghost" href="index.html">랜딩페이지로 돌아가기</a>
@@ -128,7 +147,6 @@ PAGES["platform.html"] = dict(
   <h2>여기로 오게 되는 링크</h2>
   <ul>
     <li>헤더와 푸터의 <b>로그인</b></li>
-    <li>헤더의 <b>무료로 시작</b>, 푸터의 <b>회원가입</b></li>
     <li>모바일 메뉴의 서비스 화면 링크 — 논제와 자료, 토론방, 논술 제출, 학습 홈,
         교사 진행 안내, 토론 리포트, 쟁점 보드, 내 학습 기록</li>
   </ul>
