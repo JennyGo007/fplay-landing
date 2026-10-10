@@ -1,18 +1,55 @@
 # 논담 홈페이지 공개 배포
 
 목표 주소는 `https://fplayground.com`, 관리자는 `https://fplayground.com/admin` 이다.
-이 문서는 **아직 실행하지 않은 계획**이다. 호스팅 계정과 결제, DNS, Google 설정은
-운영자가 직접 해야 하므로, 각 화면과 입력값을 그대로 적어 둔다.
+**배포됐다.** 아래 0장이 실제 상태이고, 0-1장이 다시 올릴 때 밟는 절차다.
+그 뒤 1~4장은 처음 고를 때 쓴 기준이라 참고로 남겨 둔다.
 
-## 0. 지금 상태
+## 0. 지금 상태 (2026-10-10 실측)
 
 ```
-호스팅            없음 (배포 설정 파일 0건이었다. 이 문서와 Dockerfile 이 첫 준비물이다)
-fplayground.com   호스팅케이알 파킹 페이지. A 75.2.85.42 / 99.83.196.71,
-                  NS ns1~4.hosting.co.kr, 443 포트 닫힘 → HTTPS 없음
-저장소            JennyGo007/fplay-landing, master
-빌드·검사         npm run build 성공 / npm test 11건 통과 / check:video 43건 통과
+호스팅            AWS Lightsail `nondam-homepage` (서울) · 43.200.113.168
+                  한 서버에 컨테이너 셋 — nondam(8099) · cheonghwadang(3001) · caddy(80/443)
+                  Caddy 가 HTTPS 를 맡고 `nondam:8099` 로 넘긴다. 두 사이트는 분리돼 있다.
+fplayground.com   위 IP. http 308 → https 200
+저장소            JennyGo007/fplay-landing, master — **서버에도 사본이 있다** `/srv/nondam`
+영구 디스크       /srv/nondam-data → 컨테이너의 /data (state.json · media/)
+비밀값            /srv/nondam-config/nondam.env (600 root:root). 저장소에 넣지 않는다.
+검사              tools/check.py 137건 / npm test 11건
 ```
+
+## 0-1. 다시 올리기
+
+```bash
+# ① 로컬에서 검사하고 올린다
+python tools/check.py && npm test && git push origin master
+
+# ② 서버에서 받아 빌드한다 (이전 이미지는 지우지 않는다 — 되돌릴 길)
+ssh ubuntu@43.200.113.168
+cd /srv/nondam && git fetch origin && git merge --ff-only origin/master
+SHA=$(git rev-parse --short HEAD)
+sudo docker tag nondam-homepage:latest "nondam-homepage:rollback-$(docker inspect nondam   --format '{{.Config.Image}}' | cut -d: -f2)"
+sudo docker build -t "nondam-homepage:$SHA" .
+
+# ③ 교체한다. **운영 데이터(/srv/nondam-data)는 건드리지 않는다.**
+sudo cp -a /srv/nondam-data/state.json "/srv/nondam-data-backup/state-$(date -u +%Y%m%dT%H%M%SZ).json"
+sudo docker stop nondam && sudo docker rm nondam
+sudo docker run -d --name nondam --restart unless-stopped   --network nondam-net --env-file /srv/nondam-config/nondam.env   -v /srv/nondam-data:/data "nondam-homepage:$SHA"
+sudo docker tag "nondam-homepage:$SHA" nondam-homepage:latest
+
+# ④ 확인
+curl -sI https://fplayground.com | head -1
+```
+
+**되돌리기**: `docker stop nondam && docker rm nondam` 뒤 ③의 `run` 을
+`nondam-homepage:rollback-<이전SHA>` 로 한 번 더 돌린다. 운영 데이터는 그대로다.
+
+**주의 둘.**
+· `docker run` 에 **명령을 덧붙이지 않는다.** 이미지의 CMD 가 `start:container` 이고
+  그것이 `0.0.0.0` 에 붙는다. 전에는 run 쪽에서 덮어 썼는데 그 지식이 적혀 있지 않아,
+  평범하게 다시 띄운 순간 **502** 가 났다.
+· 서버 저장소에서 `sudo git` 을 쓰지 않는다. root 소유 파일이 섞여 다음 `git fetch` 가
+  `Permission denied` 로 막힌다(실제로 그랬다). 섞였으면
+  `sudo chown -R ubuntu:ubuntu /srv/nondam` 으로 되돌린다.
 
 ## 1. 이 앱이 호스팅에 요구하는 것
 

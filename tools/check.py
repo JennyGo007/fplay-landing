@@ -564,6 +564,16 @@ check("관리자 링크 이름이 F-Play 관리와 구분된다",
       ">홈페이지 관리</a>" in render_src and ">관리자 로그인</a>" not in render_src,
       "두 /admin 을 같은 이름으로 부르면 어디로 가는지 알 수 없다")
 
+# ────────────────────────────────────────────────────────────────
+# 컨테이너는 0.0.0.0 에 붙어야 한다 — 127.0.0.1 이면 프록시가 닿지 못해 502 다.
+dockerfile = read(ROOT + "/Dockerfile")
+pkg = read(ROOT + "/package.json")
+check("컨테이너 기동이 0.0.0.0 에 붙는다",
+      'start:container' in dockerfile and '--hostname 0.0.0.0' in pkg,
+      "이미지를 평범하게 띄우면 502 가 된다")
+check("로컬 start 는 127.0.0.1 을 유지한다",
+      '"start": "next start --hostname 127.0.0.1' in pkg)
+
 print("\n" + "=" * 62)
 print("통과 %d건 / 실패 %d건" % (oks, len(fails)))
 for f in fails:

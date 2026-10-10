@@ -43,5 +43,10 @@ RUN mkdir -p /data && chown -R app:app /data /app
 USER app
 VOLUME ["/data"]
 EXPOSE 8099
-# next start 는 package.json 의 start 스크립트가 호스트·포트를 지정한다.
-CMD ["npm", "start"]
+# **컨테이너는 0.0.0.0 에 붙어야 한다.** `start` 는 127.0.0.1 로 묶여 있어서,
+# 그대로 띄우면 컨테이너 안 loopback 만 듣고 역방향 프록시가 닿지 못한다 → 502.
+# 전에는 `docker run` 쪽에서 명령을 덮어 해결했는데, 그 지식이 어디에도 적혀 있지 않아
+# 평범하게 다시 띄우는 순간 사이트가 내려갔다(실제로 그랬다). 이미지가 스스로 맞게 뜬다.
+#
+# `start` 는 로컬 확인용으로 127.0.0.1 을 유지한다 — 개발 중에 바깥으로 열지 않는다.
+CMD ["npm", "run", "start:container"]
