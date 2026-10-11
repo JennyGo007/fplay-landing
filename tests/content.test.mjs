@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {mkdtemp,rm} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import {seed,validate,mutate,readState,dataDir} from '../lib/content.mjs';
+import {seed,validate,mutate,readState,dataDir,DEFAULT_PLATFORM_URL,platformUrlOf} from '../lib/content.mjs';
 import {render,currentNotices} from '../lib/render.mjs';
 import {byteRange} from '../lib/files.mjs';
 test('content rejects unsafe destinations and tampered editable IDs',()=>{
@@ -52,4 +52,42 @@ test('guide requests current sizing CSS using its content hash',async()=>{
   const hash=createHash('sha256').update(await readFile(new URL('../site/assets/css/page.css',import.meta.url))).digest('hex').slice(0,16);
   const html=await render('guide.html',seed);
   assert.ok(html.includes(`href="assets/css/page.css?v=${hash}"`));
+});
+
+// 비어 있던 platformUrl 때문에 **모든** 이용·로그인 링크가 안내 페이지에서 멈춰 있었다.
+// 운영에서 실제로 그 상태였다(2026-10-11 확인: FPLAY_CONFIG.platformUrl === "").
+test('platform links reach the real platform even when the CMS value is blank',async()=>{
+  assert.equal(platformUrlOf({platformUrl:''}),DEFAULT_PLATFORM_URL);
+  assert.equal(platformUrlOf({platformUrl:'   '}),DEFAULT_PLATFORM_URL);
+  assert.equal(platformUrlOf({}),DEFAULT_PLATFORM_URL);
+  // 관리자가 넣은 값이 있으면 그것이 이긴다.
+  assert.equal(platformUrlOf({platformUrl:'https://other.test'}),'https://other.test');
+
+  const c=structuredClone(seed);c.platformUrl='';
+  const h=await render('index.html',c);
+  // 랜딩의 이용·로그인 링크가 더는 안내 페이지에 머물지 않는다.
+  assert.ok(!/href="platform.html" data-fplay-link="platform"/.test(h),'아직 안내 페이지로 간다');
+  assert.ok(h.includes(`href="${DEFAULT_PLATFORM_URL}" data-fplay-link="platform"`),'실제 주소로 가지 않는다');
+  assert.ok(h.includes(`"platformUrl":"${DEFAULT_PLATFORM_URL}"`),'스크립트 설정에도 주소가 없다');
+  // 튜토리얼은 제 목적대로 가이드로 간다 — 플랫폼으로 돌리지 않는다.
+  assert.ok(h.includes('href="guide.html" data-fplay-link="guide"'),'튜토리얼 링크가 바뀌었다');
+
+  // 안내 페이지는 **자기 자신을 가리키지 않고** 이동 버튼을 보인다.
+  const pf=await render('platform.html',c);
+  assert.ok(!pf.includes('이용 주소가 아직 연결되지 않았습니다'),'연결 안 됐다고 적는다');
+  assert.ok(!/<div class="fp-actions" id="fpEnter" hidden>/.test(pf),'이동 버튼이 숨겨져 있다');
+  assert.ok(pf.includes('href="platform.html" data-fplay-link="platform"'),'버튼이 서버 치환 대상에서 빠졌다');
+  assert.ok(pf.includes(`"platformUrl":"${DEFAULT_PLATFORM_URL}"`),'버튼이 쓸 주소가 없다');
+});
+
+// 모바일 메뉴의 이용 링크 11개를 한 줄에 `flex:1` 로 욱여넣어 글자가 세로로 한 자씩
+// 찍히고 '튜토리얼' 이 잘려 있었다.
+test('mobile menu wraps entry links instead of squeezing them into one row',async()=>{
+  const h=await render('index.html',structuredClone(seed));
+  assert.ok(!/\.nd-nav__auth[^{]*\{display:flex;gap:10px/.test(h),'여전히 한 줄에 욱여넣는다');
+  assert.ok(h.includes('flex-wrap:wrap'),'줄바꿈이 없다');
+  assert.ok(h.includes('min-height:48px'),'손가락으로 누를 크기가 아니다');
+  assert.ok(!/\.nd-nav__auth a[^{]*\{flex:1;/.test(h),'링크가 아직 같은 비율로 쪼개진다');
+  // `.nd-nav a{color:#212529}` 가 `.nd-btn--dark{color:#fff}` 를 이겨 **검은 단추에 검은 글씨**였다.
+  assert.ok(h.includes('.nd-nav__auth a.nd-btn--dark'),'어두운 단추의 글자색을 되돌리지 않았다');
 });
