@@ -384,3 +384,113 @@ th {
     margin-top: 18px;
   }
 }
+
+/* ── 신청서 폼 (apply.html) ────────────────────────────────────────
+ * 한 칸에 한 가지만 묻는다. 라벨·입력·도움말이 세로로 쌓이는 모양이
+ * 휴대전화에서 가장 덜 틀린다. */
+
+.fp-field {
+  margin: 18px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fp-field label {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.fp-req {
+  color: #e03131;
+  margin-left: 2px;
+}
+
+.fp-field input,
+.fp-field select,
+.fp-field textarea {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--fp-line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--fp-ink);
+  font: inherit;
+  font-size: 16px; /* 16px 아래로 내리면 iOS 가 화면을 확대한다 */
+  line-height: 1.5;
+}
+
+.fp-field textarea {
+  resize: vertical;
+  min-height: 96px;
+}
+
+.fp-field input:focus-visible,
+.fp-field select:focus-visible,
+.fp-field textarea:focus-visible,
+.fp-check input:focus-visible {
+  outline: 2px solid var(--fp-brand);
+  outline-offset: 1px;
+}
+
+.fp-hint {
+  color: var(--fp-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.fp-help {
+  margin: -8px 0 0;
+  color: var(--fp-muted);
+  font-size: 15px;
+}
+
+/* 가장 자주 어긋나는 칸 하나만 눈에 띄게 한다. 전부 칠하면 아무것도 안 띈다. */
+.fp-field--mark {
+  padding: 14px 16px;
+  border: 1px solid var(--fp-line);
+  border-left: 3px solid var(--fp-brand);
+  border-radius: 8px;
+  background: var(--fp-soft);
+}
+
+.fp-check {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 14px 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.fp-check input {
+  margin-top: 5px;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  accent-color: var(--fp-brand);
+}
+
+.fp-form-status {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.fp-form-status:empty {
+  display: none;
+}
+
+.fp-form-status[data-state="ok"] {
+  border: 1px solid #b2d8c3;
+  background: #eef8f2;
+  color: #11612f;
+}
+
+.fp-form-status[data-state="warn"] {
+  border: 1px solid #f0c2c2;
+  background: #fdf0f0;
+  color: #a32020;
+}

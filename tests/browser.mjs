@@ -49,6 +49,36 @@ try{
   assert.ok(result.time>1);assert.equal(result.error,null);assert.equal(result.width,1280);console.log('일반 가이드 실제 영상 재생:',JSON.stringify(result));
   const noJS=await browser.newContext({javaScriptEnabled:false});const p2=await noJS.newPage();await p2.goto(base+'/guide.html');assert.equal(await p2.locator('video').count(),1);assert.ok(await p2.locator('video').isVisible());
   await page.setViewportSize({width:390,height:844});await page.goto(base+'/guide.html');assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+  // 기관 도입 신청서 — **막아야 할 때 막고, 담아야 할 것을 담는가.**
+  // 이 폼은 어디에도 저장하지 않고 메일 앱만 연다. 그래서 '보냈다' 로 말하면 안 되고,
+  // 확인 체크 둘을 건너뛴 채 메일이 만들어져서도 안 된다.
+  await page.setViewportSize({width:1280,height:900});await page.goto(base+'/apply.html');
+  await page.locator('[data-fplay-form="apply"]').waitFor();
+  const applyStatus=()=>page.evaluate(()=>{const s=document.querySelector('.fp-form-status');
+    return {state:s?.getAttribute('data-state')||null,text:s?.textContent||'',href:document.querySelector('[data-fplay-mailto]')?.getAttribute('href')||null};});
+  const applySubmit=()=>page.evaluate(()=>document.querySelector('[data-fplay-form="apply"]').dispatchEvent(new Event('submit',{cancelable:true,bubbles:true})));
+  await applySubmit();let ap=await applyStatus();
+  assert.equal(ap.state,'warn');assert.equal(ap.href,null,'빈 채로도 메일이 만들어진다');
+  for(const [n,v] of [['org','검사기관'],['kind','학교'],['rep','대표'],['repEmail','rep@example.com'],
+    ['manager','담당'],['managerGoogle','manager@gmail.com'],['managerPhone','010-0000-0000']])
+    await page.fill('[name="'+n+'"]',v).catch(()=>page.selectOption('[name="'+n+'"]',v));
+  await applySubmit();ap=await applyStatus();
+  assert.equal(ap.state,'warn');assert.ok(ap.text.includes('위의 사실과 다름없습니다'),'사실 확인을 묻지 않는다');
+  await page.check('[name="truth"]');await applySubmit();ap=await applyStatus();
+  assert.equal(ap.state,'warn');assert.ok(ap.text.includes('개인정보'),'개인정보 동의를 묻지 않는다');
+  await page.check('[name="consent"]');await applySubmit();ap=await applyStatus();
+  assert.equal(ap.state,'ok');
+  // 보냈는지 이 페이지는 알 수 없다. 랜딩 문의 폼과 같은 규칙이다.
+  assert.ok(!/접수|전송 완료|발송/.test(ap.text),'보내지 않았는데 보냈다고 말한다');
+  assert.ok(ap.href&&ap.href.startsWith('mailto:'),'되살릴 고리가 없다');
+  const applyBody=decodeURIComponent(ap.href.split('&body=')[1]||'');
+  for(const want of ['기관 이름: 검사기관','기관 유형: 학교','구글 로그인 이메일: manager@gmail.com',
+    '위의 사실과 다름없습니다: 예','사업자등록증 사본'])
+    assert.ok(applyBody.includes(want),'본문에 빠졌다: '+want);
+  await page.setViewportSize({width:390,height:844});await page.goto(base+'/apply.html');
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'신청서가 휴대전화에서 가로로 넘친다');
+  console.log('기관 도입 신청서: 확인 체크 두 개가 막고, 본문에 등록용 칸이 담긴다');
+
   await context.addCookies([{name:'next-auth.session-token',value:cookie.split('=')[1],domain:'127.0.0.1',path:'/',httpOnly:true,sameSite:'Lax'}]);
   await page.setViewportSize({width:1280,height:900});await page.goto(base+'/admin');await page.getByRole('heading',{name:'홈페이지 문구',exact:true}).waitFor();
   await page.getByRole('button',{name:'연결·연락처',exact:true}).click();await page.getByLabel('문의 받을 이메일').fill('contact-updated@example.com');

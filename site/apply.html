@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>기관 도입 신청서 | NONDAM : F-Play</title>
+<meta name="description" content="상담을 거친 기관이 계약에 필요한 정보를 한 번에 보내는 양식입니다.">
+<!-- 상담 중에 주소를 보내는 양식이다. 검색에 걸릴 자리가 아니다. -->
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="assets/brand/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/brand/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/brand/favicon-16.png">
+<link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
+<link rel="stylesheet" href="assets/css/fonts.css">
+<link rel="stylesheet" href="assets/css/page.css?v=fa00d4b753ddc85f">
+</head>
+<body>
+<header class="fp-head">
+  <div class="fp-head__inner">
+    <a class="fp-logo" href="index.html"><img src="assets/brand/icon-192.png" alt="연꽃 심벌" width="192" height="192">NONDAM : F-Play</a>
+    <a class="fp-back" href="index.html">← 랜딩페이지로</a>
+  </div>
+</header>
+
+<main>
+  <p class="fp-kicker">APPLY</p>
+  <h1>기관 도입 신청서</h1>
+  <p class="fp-lead">
+    상담에서 이야기한 내용을 바탕으로, 계약에 필요한 정보를 한 번에 보내 주시는 양식입니다.
+    보내 주신 내용은 <b>사업자등록증 등 증빙과 대조한 뒤</b> 저희가 직접 등록합니다.
+    적어 주신 것만으로 계정이 만들어지거나 이용이 시작되지는 않습니다.
+  </p>
+
+  <div class="fp-note">
+    <strong>보내는 방법.</strong>
+    아래를 채우고 맨 끝의 보내기를 누르면 <b>메일 앱이 열리고</b> 내용이 담깁니다.
+    그 메일에 <b>사업자등록증 사본을 첨부</b>해 보내 주세요. 이 페이지는 입력한 내용을
+    어디에도 저장하지 않습니다.
+  </div>
+
+  <form data-fplay-form="apply" action="#" method="post" novalidate>
+
+    <h2>1. 계약 주체</h2>
+    <p class="fp-help">계약서에 적히는 정보입니다. 증빙 서류와 글자가 같아야 합니다.</p>
+
+    <div class="fp-field">
+      <label for="ap-org">기관 이름 <span class="fp-req">*</span></label>
+      <input id="ap-org" name="org" type="text" autocomplete="organization" placeholder="사업자등록증에 적힌 정식 명칭">
+      <span class="fp-hint">줄여 쓰는 이름이 아니라 서류에 적힌 그대로 적어 주세요.</span>
+    </div>
+
+    <div class="fp-field">
+      <label for="ap-kind">기관 유형 <span class="fp-req">*</span></label>
+      <select id="ap-kind" name="kind">
+        <option value="">고르지 않음</option>
+        <option value="학교">학교</option>
+        <option value="학원·공부방">학원·공부방</option>
+        <option value="도서관">도서관</option>
+        <option value="기업">기업</option>
+        <option value="공공기관">공공기관</option>
+        <option value="개인">개인</option>
+        <option value="그 밖">그 밖</option>
+      </select>
+      <span class="fp-hint">이름만으로는 유형을 짐작하지 않습니다. 직접 골라 주세요.</span>
+    </div>
+
+    <div class="fp-field">
+      <label for="ap-regno">사업자등록번호 · 고유번호</label>
+      <input id="ap-regno" name="regno" type="text" inputmode="numeric" placeholder="000-00-00000">
+      <span class="fp-hint">없는 기관은 비워 두셔도 됩니다. 증빙 사본은 메일에 첨부해 주세요.</span>
+    </div>
+
+    <h2>2. 계약서상 대표</h2>
+    <p class="fp-help">계약서에 서명하는 분입니다. 아래 ‘운영 담당자’와 같은 분이어도 됩니다.</p>
+
+    <div class="fp-field">
+      <label for="ap-rep">대표 이름 <span class="fp-req">*</span></label>
+      <input id="ap-rep" name="rep" type="text" autocomplete="name" placeholder="홍길동">
+    </div>
+
+    <div class="fp-field">
+      <label for="ap-rep-email">대표 이메일 <span class="fp-req">*</span></label>
+      <input id="ap-rep-email" name="repEmail" type="email" autocomplete="email" placeholder="rep@example.com">
+    </div>
+
+    <div class="fp-field">
+      <label for="ap-rep-phone">대표 연락처</label>
+      <input id="ap-rep-phone" name="repPhone" type="tel" autocomplete="tel" placeholder="02-0000-0000">
+    </div>
+
+    <h2>3. 운영 담당자</h2>
+    <p class="fp-help">
+      기관 안에서 실제로 교사를 등록하고 수업을 관리할 분입니다.
+    </p>
+
+    <div class="fp-field">
+      <label for="ap-mgr">담당자 이름 <span class="fp-req">*</span></label>
+      <input id="ap-mgr" name="manager" type="text" placeholder="홍길동">
+    </div>
+
+    <div class="fp-field fp-field--mark">
+      <label for="ap-mgr-google">담당자가 <b>구글 로그인에 쓰는</b> 이메일 <span class="fp-req">*</span></label>
+      <input id="ap-mgr-google" name="managerGoogle" type="email" autocomplete="email" placeholder="manager@gmail.com">
+      <span class="fp-hint">
+        <b>여기가 가장 자주 어긋나는 곳입니다.</b> 저희는 아이디와 비밀번호를 만들어
+        드리지 않습니다. 담당자분이 <b>본인 구글 계정으로</b> 로그인하십니다.
+        그래서 이 주소가 실제 로그인 계정과 <b>글자 하나까지 같아야</b> 합니다.
+        업무용 메일과 구글 계정이 다른 경우가 많으니 한 번 확인해 주세요.
+      </span>
+    </div>
+
+    <div class="fp-field">
+      <label for="ap-mgr-phone">담당자 연락처 <span class="fp-req">*</span></label>
+      <input id="ap-mgr-phone" name="managerPhone" type="tel" autocomplete="tel" placeholder="010-0000-0000">
+    </div>
+
+    <h2>4. 이용 계획</h2>
+    <p class="fp-help">규모를 가늠하는 데만 씁니다. 대략으로 적으셔도 됩니다.</p>
+
+    <div class="fp-field">
+      <label for="ap-scale">예상 규모</label>
+      <input id="ap-scale" name="scale" type="text" placeholder="교사 3명 · 학급 4개 · 학생 60명 정도">
+    </div>
+
+    <div class="fp-field">
+      <label for="ap-when">이용 시작 희망 시기</label>
+      <input id="ap-when" name="startAt" type="text" placeholder="2026년 3월 새 학기">
+    </div>
+
+    <div class="fp-field">
+      <label for="ap-note">덧붙일 말</label>
+      <textarea id="ap-note" name="note" rows="4" placeholder="수업 과목, 상담에서 나눈 이야기, 그 밖에 알려 주실 것"></textarea>
+    </div>
+
+    <h2>5. 확인</h2>
+
+    <label class="fp-check">
+      <input type="checkbox" name="truth">
+      <span>
+        <b>위의 사실과 다름없습니다.</b>
+        적어 주신 내용은 증빙 서류와 대조합니다. 서류와 다르면 등록이 미뤄집니다.
+      </span>
+    </label>
+
+    <label class="fp-check">
+      <input type="checkbox" name="consent">
+      <span>
+        개인정보 수집 및 이용에 동의합니다. 수집한 정보는 도입 상담과 계약 확인에만 쓰고,
+        확인이 끝나면 파기합니다.
+        <a href="privacy.html" target="_blank" rel="noopener">개인정보처리방침</a>
+      </span>
+    </label>
+
+    <div class="fp-actions">
+      <button type="submit" class="fp-btn">메일 앱으로 보내기</button>
+      <a class="fp-btn fp-btn--ghost" href="index.html#contact">그냥 문의만 하기</a>
+    </div>
+  </form>
+</main>
+
+<footer class="fp-foot">
+  <div class="fp-foot__inner">
+    <span>© <span id="fpYear">2026</span> NONDAM : F-Play. All rights reserved.</span>
+    <a href="index.html#contact">도입 문의</a>
+    <a href="privacy.html">개인정보처리방침</a>
+    <a href="terms.html">이용약관</a>
+  </div>
+</footer>
+<script>
+/* 연도는 해마다 손대지 않도록 표시할 때 채운다. */
+(function(){var y=document.getElementById("fpYear");if(y){y.textContent=new Date().getFullYear();}})();
+</script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/apply.js"></script>
+</body>
+</html>

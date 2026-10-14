@@ -605,6 +605,35 @@ if og_img:
 check("큰 그림 카드 선언과 그림이 짝을 이룬다",
       ('content="summary_large_image"' in index_html) == ('name="twitter:image"' in index_html))
 
+# ────────────────────────────────────────────────────────────
+# 기관 도입 신청서 — 받은 내용을 **운영자가 서류와 대조한 뒤** 직접 등록한다.
+# 이 폼이 계약 주체를 만들지 않는다는 것이 설계의 핵심이다.
+apply_html = read(SITE + "/apply.html")
+apply_js = read(SITE + "/assets/js/apply.js")
+route_js = read(ROOT + "/app/[[...path]]/route.js")
+check("신청서가 라우터 허용 목록에 있다", "apply.html" in route_js,
+      "목록에 없으면 404 다")
+# 상담 중에 주소를 보내는 양식이다. 검색에 걸리면 아무나 들어와 적는다.
+check("신청서는 검색에 걸리지 않는다", 'content="noindex,nofollow"' in apply_html)
+# 확인 체크 둘. 사실 확인은 서류와 어긋났을 때 근거가 되는 자리다.
+check("'위의 사실과 다름없습니다' 체크가 있다", "위의 사실과 다름없습니다" in apply_html)
+check("사실 확인을 건너뛰면 막힌다", 'checked("truth")' in apply_js)
+check("개인정보 동의를 건너뛰면 막힌다", 'checked("consent")' in apply_js)
+# 기관 유형은 계약 주체 표의 어휘와 같아야 한다. 이름으로 유형을 짐작하지 않는다.
+for kind in ["학교", "학원·공부방", "도서관", "기업", "공공기관", "개인", "그 밖"]:
+    check("기관 유형에 %s 가 있다" % kind, 'value="%s"' % kind in apply_html)
+check("고르지 않은 상태가 기본이다", '<option value="">' in apply_html)
+# 가장 자주 어긋나는 칸 — 담당자의 구글 로그인 계정.
+check("구글 로그인 계정을 따로 묻는다", 'name="managerGoogle"' in apply_html)
+check("왜 그 주소여야 하는지 적는다", "글자 하나까지 같아야" in apply_html)
+# 저장하지 않는다. 보냈는지도 알 수 없다 — 랜딩 문의 폼과 같은 규칙이다.
+check("어디에도 저장하지 않는다고 적는다", "어디에도 저장하지 않습니다" in apply_html)
+check("신청 결과를 '접수·전송 완료' 로 말하지 않는다",
+      "메일 앱에 신청 내용을 담았습니다" in apply_js
+      and not any(w in apply_js for w in ["접수되었습니다", "접수 완료", "전송되었습니다", "발송되었습니다"]))
+# 메일 앱이 열리지 않았을 때 **채운 내용이 살아 있어야** 한다.
+check("되살릴 고리에 내용이 담긴다", "again.href = href" in apply_js)
+
 print("\n" + "=" * 62)
 print("통과 %d건 / 실패 %d건" % (oks, len(fails)))
 for f in fails:

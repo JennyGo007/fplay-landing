@@ -12,7 +12,7 @@ export async function GET(req,{params}){
     const preview=new URL(req.url).searchParams.get('preview')==='draft';
     if(preview)await requireAdmin();
     const state=preview?await readState():await publicState(),content=preview?state.draft:state.published;
-    if(['index.html','guide.html','platform.html','privacy.html','terms.html'].includes(file))return new Response(req.method==='HEAD'?null:await render(file,content,{preview}),{headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'private, no-store',...(preview?{'X-Robots-Tag':'noindex, nofollow'}:{})}});
+    if(['index.html','guide.html','platform.html','privacy.html','terms.html','apply.html'].includes(file))return new Response(req.method==='HEAD'?null:await render(file,content,{preview}),{headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'private, no-store',...(preview?{'X-Robots-Tag':'noindex, nofollow'}:{})}});
     if(file.startsWith('assets/'))return fileResponse(path.join(projectRoot,'site'),file,req);
     if(file.startsWith('media/')){
       // 미게시 업로드는 주소를 알아도 관리자만 조회할 수 있다.
