@@ -644,6 +644,19 @@ check("올릴 수 없는 파일 칸을 두지 않는다", 'type="file"' not in a
 check("메일 본문에도 첨부 안내가 담긴다", "첨부해 주실 서류" in apply_js)
 # 자동 검사가 돌 때마다 메일 창이 떠오르면 안 된다.
 check("자동 검사에서는 메일 앱을 열지 않는다", "navigator.webdriver" in apply_js)
+# 방침은 **지금 하는 일**과 같아야 한다. 신청서에서 서류를 받기 시작했으므로
+# 방침에도 그 사실과 다루는 방법이 적혀 있어야 한다.
+privacy_html = read(SITE + "/privacy.html")
+check("방침이 기관 도입 신청 항목을 적는다", "기관 도입 신청" in privacy_html)
+check("방침이 증빙 서류를 적는다", "증빙 서류" in privacy_html)
+check("서류를 서버에 저장하지 않는다고 못 박는다",
+      "서버에 저장하지 않습니다" in privacy_html)
+check("사업자등록번호 원문을 두지 않는다고 적는다",
+      "원문 그대로 저장하지 않습니다" in privacy_html)
+# 방침과 신청서가 어긋나면 둘 중 하나는 거짓이 된다.
+check("방침과 신청서가 같은 말을 한다",
+      ("파일을 올리는 기능 자체가 없습니다" in privacy_html)
+      and ('type="file"' not in apply_html))
 
 print("\n" + "=" * 62)
 print("통과 %d건 / 실패 %d건" % (oks, len(fails)))
