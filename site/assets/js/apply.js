@@ -116,7 +116,11 @@
         "위의 사실과 다름없습니다: 예",
         "개인정보 수집·이용 동의: 예",
         "",
-        "※ 사업자등록증 사본을 이 메일에 첨부해 주세요.",
+        "[첨부해 주실 서류]",
+        "· 사업자등록증 사본 (필수)",
+        "· 통장 사본 (대금 정산이 필요한 경우)",
+        "",
+        "※ 이 메일에 파일로 붙여 보내 주세요. 신청 페이지에서는 파일을 올릴 수 없습니다.",
       ];
 
       var href =
@@ -141,7 +145,10 @@
       status.appendChild(again);
       status.appendChild(document.createTextNode(" 를 누르거나 " + email + " 로 직접 보내 주세요."));
 
-      window.location.href = href;
+      // 자동으로 메일 앱을 연다. 다만 **자동 검사가 돌 때는 열지 않는다** —
+      // 검사를 돌릴 때마다 개발자 컴퓨터에 메일 창이 떠오른다(실제로 그랬다).
+      // navigator.webdriver 는 사람이 쓰는 브라우저에서는 늘 false 다.
+      if (!navigator.webdriver) window.location.href = href;
     });
   });
 })();

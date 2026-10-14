@@ -633,6 +633,17 @@ check("신청 결과를 '접수·전송 완료' 로 말하지 않는다",
       and not any(w in apply_js for w in ["접수되었습니다", "접수 완료", "전송되었습니다", "발송되었습니다"]))
 # 메일 앱이 열리지 않았을 때 **채운 내용이 살아 있어야** 한다.
 check("되살릴 고리에 내용이 담긴다", "again.href = href" in apply_js)
+# 서류는 메일에 붙인다. mailto 는 **파일을 붙일 수 없다** — 페이지가 그 사실을 밝혀야
+# 신청자가 올릴 곳을 찾아 헤매지 않는다.
+check("첨부할 서류를 적어 둔다",
+      "사업자등록증 사본" in apply_html and "통장 사본" in apply_html)
+check("페이지에서는 파일을 올릴 수 없다고 밝힌다",
+      "파일을 올리는 곳이 아닙니다" in apply_html)
+# 파일 올리는 칸을 몰래 만들지 않는다 — 받는 서버가 없는데 칸만 있으면 올린 줄 안다.
+check("올릴 수 없는 파일 칸을 두지 않는다", 'type="file"' not in apply_html)
+check("메일 본문에도 첨부 안내가 담긴다", "첨부해 주실 서류" in apply_js)
+# 자동 검사가 돌 때마다 메일 창이 떠오르면 안 된다.
+check("자동 검사에서는 메일 앱을 열지 않는다", "navigator.webdriver" in apply_js)
 
 print("\n" + "=" * 62)
 print("통과 %d건 / 실패 %d건" % (oks, len(fails)))
