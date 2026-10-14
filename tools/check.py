@@ -584,6 +584,27 @@ check("문의 결과를 '접수·전송 완료' 로 말하지 않는다",
       "메일 앱에 문의 내용을 담았습니다" in sjs
       and not any(w in sjs for w in ["접수되었습니다", "접수 완료", "전송되었습니다", "발송되었습니다"]))
 
+# ────────────────────────────────────────────────────────────
+# 링크 미리보기 그림 — 없으면 카카오톡이 **파비콘을 끌어다 카드 너비까지 늘린다.**
+# 실제로 그랬다. 수집기는 상대 경로를 읽지 못하므로 절대 주소여야 한다.
+index_html = read(SITE + "/index.html")
+og_img = re.search(r'<meta property="og:image" content="([^"]+)"', index_html)
+check("링크 미리보기 그림을 지정한다", og_img is not None,
+      "없으면 카카오톡이 파비콘을 늘려 쓴다")
+if og_img:
+    check("미리보기 그림 주소가 절대 경로다", og_img.group(1).startswith("https://"),
+          og_img.group(1))
+    card = SITE + "/" + og_img.group(1).replace("https://fplayground.com/", "")
+    check("미리보기 그림 파일이 실제로 있다", os.path.exists(card), card)
+    if os.path.exists(card):
+        head = io.open(card, "rb").read(26)
+        w = int.from_bytes(head[16:20], "big")
+        h = int.from_bytes(head[20:24], "big")
+        check("미리보기 그림이 1200x630 이다", (w, h) == (1200, 630), "%dx%d" % (w, h))
+# summary_large_image 를 선언해 놓고 그림이 없으면 큰 그림 카드가 빈 채로 나간다.
+check("큰 그림 카드 선언과 그림이 짝을 이룬다",
+      ('content="summary_large_image"' in index_html) == ('name="twitter:image"' in index_html))
+
 print("\n" + "=" * 62)
 print("통과 %d건 / 실패 %d건" % (oks, len(fails)))
 for f in fails:
